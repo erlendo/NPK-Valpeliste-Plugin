@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPK Valpeliste - Visual Preview</title>
+    <style>
+        /* Inkludert CSS direkte for å sikre at det fungerer */
+        :root {
+            --valpeliste-primary: #2196F3;
+            --valpeliste-card-border: #e0e0e0;
+            --valpeliste-card-bg: #fff;
+            --valpeliste-header-bg: #f8f8f8;
+            --valpeliste-info-bg: #f2f2f2;
+            --valpeliste-card-padding: 15px;
+            --valpeliste-border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-note {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+
+        /* NPK Valpeliste Styling */
+        .valpeliste-container {
+            margin: 20px 0;
+            width: 100%;
+            display: block;
+            clear: both;
+            box-sizing: border-box;
+        }
+
+        .valpeliste-card-group {
+            display: grid;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .valpeliste-card {
+            border: 1px solid var(--valpeliste-card-border);
+            border-radius: var(--valpeliste-border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--valpeliste-card-bg);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .valpeliste-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .valpeliste-card-top {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f8f8;
+        }
+
+        .valpeliste-card-header {
+            padding: var(--valpeliste-card-padding);
+            background-color: var(--valpeliste-header-bg);
+        }
+
+        .valpeliste-card-title {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .valpeliste-dog-link {
+            color: var(--valpeliste-primary);
+            text-decoration: none;
+        }
+
+        .valpeliste-dog-link:hover {
+            text-decoration: underline;
+        }
+
+        .valpeliste-card-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .valpeliste-meta-item {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .valpeliste-card-info {
+            padding: var(--valpeliste-card-padding);
+            background-color: var(--valpeliste-info-bg);
+            font-size: 0.9em;
+        }
+
+        .valpeliste-info-section {
+            margin-bottom: 10px;
+        }
+
+        .valpeliste-info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .valpeliste-info-section a {
+            color: var(--valpeliste-primary);
+            text-decoration: none;
+        }
+
+        .valpeliste-card-body {
+            padding: var(--valpeliste-card-padding);
+        }
+
+        .valpeliste-badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .valpeliste-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .valpeliste-badge.health {
+            background-color: #4CAF50;
+        }
+
+        .valpeliste-badge.approved {
+            background-color: #2196F3;
+        }
+
+        .valpeliste-badge.competition {
+            background-color: #FF9800;
+        }
+
+        .valpeliste-badge.working {
+            background-color: #9C27B0;
+        }
+
+        .valpeliste-details {
+            margin-bottom: 15px;
+        }
+
+        .valpeliste-details h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .valpeliste-detail-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .valpeliste-detail-item {
+            font-size: 0.9em;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .valpeliste-read-more {
+            background: var(--valpeliste-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .valpeliste-read-more:hover {
+            background: #1976D2;
+        }
+
+        /* Responsiv design */
+        @media (max-width: 768px) {
+            .valpeliste-card-top {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-container {
+                padding: 15px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🐕 NPK Valpeliste - Visual Preview</h1>
+        
+        <div class="demo-note">
+            <strong>📋 Demo Preview:</strong> Dette viser hvordan plugin-en ser ut på nettstedet ditt. 
+            Kortene er utvidbare - klikk "Les mer" for å se alle detaljer.
+        </div>
+
+        <div class="valpeliste-container">
+            <div class="valpeliste-card-group">
+                
+                <!-- Sample Card 1 -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Pointer's Luna</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Pointer
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Kjønn:</strong> Tispe
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Fødselsdato:</strong> 15.03.2023
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Kari Nordmann<br>
+                                <a href="mailto:kari@example.no">kari@example.no</a><br>
+                                📞 +47 123 45 678
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Oppdrett:</strong><br>
+                                Northern Pointers<br>
+                                📍 Oslo, Norge
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge health">HD A/A</span>
+                                <span class="valpeliste-badge health">ED 0/0</span>
+                                <span class="valpeliste-badge approved">✓ Godkjent avlshund</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Detaljer</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Reg.nr:</strong> NO12345/23
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Chip:</strong> 578094012345678
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Champion's Pride
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Beauty's Grace
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Helse:</strong> HD A/A, ED 0/0, Øye klart
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Jaktprøver:</strong> Apportprøve bestått
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sample Card 2 -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Setter's Max</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Engelsk Setter
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Kjønn:</strong> Hannhund
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Fødselsdato:</strong> 22.08.2022
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Ole Hansen<br>
+                                <a href="mailto:ole@example.no">ole@example.no</a><br>
+                                📞 +47 987 65 432
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Oppdrett:</strong><br>
+                                Fjell Setters<br>
+                                📍 Bergen, Norge
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge health">HD B/B</span>
+                                <span class="valpeliste-badge health">ED 0/0</span>
+                                <span class="valpeliste-badge competition">🏆 Utstillingsmester</span>
+                                <span class="valpeliste-badge approved">✓ Godkjent avlshund</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Detaljer</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Reg.nr:</strong> NO54321/22
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Chip:</strong> 578094087654321
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Noble's King
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Elegant Lady
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Helse:</strong> HD B/B, ED 0/0, Øye klart
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Utstillinger:</strong> 3x CAC, Utstillingsmester
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sample Card 3 -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Gordon's Belle</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Gordon Setter
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Kjønn:</strong> Tispe
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Fødselsdato:</strong> 10.11.2021
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Inger Svendsen<br>
+                                <a href="mailto:inger@example.no">inger@example.no</a><br>
+                                📞 +47 555 12 345
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Oppdrett:</strong><br>
+                                Highland Gordons<br>
+                                📍 Trondheim, Norge
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge health">HD A/B</span>
+                                <span class="valpeliste-badge health">ED 0/0</span>
+                                <span class="valpeliste-badge working">🎯 Jaktprøve 1.premie</span>
+                                <span class="valpeliste-badge approved">✓ Godkjent avlshund</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Detaljer</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Reg.nr:</strong> NO98765/21
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Chip:</strong> 578094056789012
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Scottish Hero
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Highland Beauty
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Helse:</strong> HD A/B, ED 0/0, Øye klart, DNA testet
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Arbeidsegenskaper:</strong> Jaktprøve 1.premie, Apportprøve bestått
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="demo-note" style="margin-top: 30px;">
+            <strong>💡 Tips:</strong> I produksjon vil dette vise ekte data fra datahound.no API eller lokal JSON-fil. 
+            Kortene kan utvides for å vise alle detaljer, og designet tilpasser seg automatisk til mobile enheter.
+        </div>
+    </div>
+
+    <script>
+        function toggleCard(button) {
+            const card = button.closest('.valpeliste-card');
+            const details = card.querySelector('.valpeliste-details');
+            const isExpanded = details.style.display === 'block';
+            
+            if (isExpanded) {
+                details.style.display = 'none';
+                button.innerHTML = '<span class="read-more-text">📖 Les mer</span>';
+                card.style.maxHeight = '';
+            } else {
+                details.style.display = 'block';
+                button.innerHTML = '<span class="read-less-text">📚 Les mindre</span>';
+                card.style.maxHeight = 'none';
+            }
+        }
+
+        // Initially hide details
+        document.addEventListener('DOMContentLoaded', function() {
+            const allDetails = document.querySelectorAll('.valpeliste-details');
+            allDetails.forEach(detail => {
+                detail.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

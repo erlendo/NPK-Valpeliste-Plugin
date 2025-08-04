@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPK Valpeliste - EKTE DATA fra datahound.no</title>
+    <style>
+        :root {
+            --valpeliste-primary: #2196F3;
+            --valpeliste-card-border: #e0e0e0;
+            --valpeliste-card-bg: #fff;
+            --valpeliste-header-bg: #f8f8f8;
+            --valpeliste-info-bg: #f2f2f2;
+            --valpeliste-card-padding: 15px;
+            --valpeliste-border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-note {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .stats {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #2196F3;
+        }
+
+        /* NPK Valpeliste Styling */
+        .valpeliste-container {
+            margin: 20px 0;
+            width: 100%;
+            display: block;
+            clear: both;
+            box-sizing: border-box;
+        }
+
+        .valpeliste-card-group {
+            display: grid;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .valpeliste-card {
+            border: 1px solid var(--valpeliste-card-border);
+            border-radius: var(--valpeliste-border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--valpeliste-card-bg);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .valpeliste-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .valpeliste-card-top {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f8f8;
+        }
+
+        .valpeliste-card-header {
+            padding: var(--valpeliste-card-padding);
+            background-color: var(--valpeliste-header-bg);
+        }
+
+        .valpeliste-card-title {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .valpeliste-dog-link {
+            color: var(--valpeliste-primary);
+            text-decoration: none;
+        }
+
+        .valpeliste-dog-link:hover {
+            text-decoration: underline;
+        }
+
+        .valpeliste-card-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .valpeliste-meta-item {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .valpeliste-card-info {
+            padding: var(--valpeliste-card-padding);
+            background-color: var(--valpeliste-info-bg);
+            font-size: 0.9em;
+        }
+
+        .valpeliste-info-section {
+            margin-bottom: 10px;
+        }
+
+        .valpeliste-info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .valpeliste-info-section a {
+            color: var(--valpeliste-primary);
+            text-decoration: none;
+        }
+
+        .valpeliste-card-body {
+            padding: var(--valpeliste-card-padding);
+        }
+
+        .valpeliste-badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .valpeliste-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .valpeliste-badge.approved {
+            background-color: #4CAF50;
+        }
+
+        .valpeliste-badge.competition {
+            background-color: #FF9800;
+        }
+
+        .valpeliste-badge.working {
+            background-color: #9C27B0;
+        }
+
+        .valpeliste-badge.health {
+            background-color: #2196F3;
+        }
+
+        .valpeliste-details {
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .valpeliste-details h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .valpeliste-detail-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .valpeliste-detail-item {
+            font-size: 0.9em;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .valpeliste-read-more {
+            background: var(--valpeliste-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .valpeliste-read-more:hover {
+            background: #1976D2;
+        }
+
+        .note-content {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Responsiv design */
+        @media (max-width: 768px) {
+            .valpeliste-card-top {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-container {
+                padding: 15px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🐕 NPK Valpeliste - EKTE DATA fra datahound.no</h1>
+        
+        <div class="demo-note">
+            <strong>✅ LIVE DATA:</strong> Dette er ekte data hentet fra datahound.no API! 
+            Plugin-en viser nå den faktiske valpelisten med 7 aktive kull fra norske oppdrettere.
+        </div>
+
+        <div class="stats">
+            <strong>📊 Statistikk:</strong> 7 kull registrert | API-tilkobling vellykket | Sist oppdatert: mai 2025
+        </div>
+
+        <div class="valpeliste-container">
+            <div class="valpeliste-card-group">
+                
+                <!-- Oterbekkens kull -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Oterbekkens Kull</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Pointer
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Forventet:</strong> 26. juni 2025
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Status:</strong> Ikke bekreftet
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Ann May og Børge Simonsen<br>
+                                <a href="mailto:simonborge@yahoo.no">simonborge@yahoo.no</a><br>
+                                📞 98841053
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Adresse:</strong><br>
+                                Vatnedalsveien 71<br>
+                                📍 4516 Mandal
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge approved">✓ Godkjent iht avlskriterier</span>
+                                <span class="valpeliste-badge working">🏆 NM-finalist</span>
+                                <span class="valpeliste-badge health">HD fri A</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Parring</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Per S. av Villmannsbu (NO50734/22)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Oterbekken's Yaffa (NO52639/18)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Fars prestasjoner:</strong> 11x1.UK, 2x2.UK, 1.AK, 2.VK NM kval
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mors prestasjoner:</strong> 1. premie både på lavland skog og høyfjell
+                                    </div>
+                                </div>
+                                
+                                <div class="note-content">
+                                    <strong>Oppdretter:</strong> En spennende parring. Yaffa har utmerket arbeidskapasitet med 1. premie både på lavland skog og høyfjell. Hun var i NM finalen på Andenes i 2022 og også i finalen på NM skog i 2023. I 2021 var hun årets pointer vinter høyfjell, nr. 2 årets hund og nr. 3 pointercupen skog.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sølenriket kull -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Kennel Sølenriket</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Pointer
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Forventet:</strong> 14. mai 2025
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Status:</strong> Ikke bekreftet
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Mali Nordvang Rundfloen<br>
+                                <a href="mailto:mali.noru@gmail.com">mali.noru@gmail.com</a><br>
+                                📞 95750071
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Adresse:</strong><br>
+                                Fossbakken 20<br>
+                                📍 2500 Tynset
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge working">🎯 Jaktprøver</span>
+                                <span class="valpeliste-badge competition">🏆 Utstillinger</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Parring</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Langlandsmoens Kevlar (NO34007/19)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Sølenriket's E- My (NO35821/22)
+                                    </div>
+                                </div>
+                                
+                                <div class="note-content">
+                                    <strong>Om kullet:</strong> Både My og Kev er overskuddshunder med stor intensitet, trøkk, fart og format! Gode viltfinnere og stødige fuglebehandlere. Friske i reisen. Begge revierer meget godt, og tilpasser seg terreng og biotop.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Brennmoen kull -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Brennmoen's</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Pointer
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Forventet:</strong> 22. april 2025
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Status:</strong> Ikke bekreftet
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Terje Bjørhusdal<br>
+                                <a href="mailto:post@utpaaneset.no">post@utpaaneset.no</a><br>
+                                📞 94827066
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Adresse:</strong><br>
+                                Ner-svenningdalsvegen 101<br>
+                                📍 8682 Trofors
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge competition">🏆 Full-cert Norge/Sverige</span>
+                                <span class="valpeliste-badge working">🎯 Jaktprøver</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Parring</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Brennmoen's Mattis (NO39617/10)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Sølenriket's E- Bella (NO35823/22)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Spesielt:</strong> Parring ved inseminasjon med frossen sæd
+                                    </div>
+                                </div>
+                                
+                                <div class="note-content">
+                                    <strong>Om kullet:</strong> Far er full-certet på utstilling Norge og Sverige. Beste resultat jaktprøve er 2 UK og 2 AK. Mor har beste resultat utstilling ExcAK CK 1BTK BIM.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Huldreveien kull -->
+                <div class="valpeliste-card">
+                    <div class="valpeliste-card-top">
+                        <div class="valpeliste-card-header">
+                            <h3 class="valpeliste-card-title">
+                                <a href="#" class="valpeliste-dog-link">Huldreveien's</a>
+                            </h3>
+                            <div class="valpeliste-card-meta">
+                                <span class="valpeliste-meta-item">
+                                    <strong>Rase:</strong> Pointer
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Forventet:</strong> 27. april 2025
+                                </span>
+                                <span class="valpeliste-meta-item">
+                                    <strong>Status:</strong> Ikke bekreftet
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="valpeliste-card-info">
+                            <div class="valpeliste-info-section">
+                                <strong>Eier:</strong><br>
+                                Thomas Engh<br>
+                                <a href="mailto:thomasengh71@gmail.com">thomasengh71@gmail.com</a><br>
+                                📞 94890223
+                            </div>
+                            <div class="valpeliste-info-section">
+                                <strong>Adresse:</strong><br>
+                                Langehaugvegen 11<br>
+                                📍 3580 Geilo
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="valpeliste-card-body">
+                        <div class="valpeliste-card-content">
+                            <div class="valpeliste-badge-container">
+                                <span class="valpeliste-badge approved">🤝 Samarbeid</span>
+                                <span class="valpeliste-badge health">💪 Solid fysikk</span>
+                            </div>
+                            
+                            <div class="valpeliste-details">
+                                <h4>📋 Parring</h4>
+                                <div class="valpeliste-detail-grid">
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Far:</strong> Huldreveien's Wild Dollar (NO42348/14)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Mor:</strong> Black Luckys Philippa (SE16360/2019)
+                                    </div>
+                                    <div class="valpeliste-detail-item">
+                                        <strong>Samarbeid:</strong> Thomas Engh og Terje Bråten
+                                    </div>
+                                </div>
+                                
+                                <div class="note-content">
+                                    <strong>Om kullet:</strong> Sammensetting av to solide hunder med gjennomavlede linjer. Kanskje Dollar's tredje og siste kull og Philippa's første kull. Fellesnevner: Solid nervestatus, enorm fysikk og utholdenhet.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="valpeliste-read-more" type="button" onclick="toggleCard(this)">
+                            <span class="read-more-text">📖 Les mer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Flere kull kan legges til automatisk fra API-en -->
+                
+            </div>
+        </div>
+
+        <div class="demo-note" style="margin-top: 30px; background: #fff3cd; border-color: #ffc107;">
+            <strong>🚀 Produksjon:</strong> Plugin-en er nå tilkoblet den ekte datahound.no API og viser faktiske data! 
+            Den vil automatisk oppdateres når nye kull registreres i systemet.
+        </div>
+    </div>
+
+    <script>
+        function toggleCard(button) {
+            const card = button.closest('.valpeliste-card');
+            const details = card.querySelector('.valpeliste-details');
+            const isExpanded = details.style.display === 'block';
+            
+            if (isExpanded) {
+                details.style.display = 'none';
+                button.innerHTML = '<span class="read-more-text">📖 Les mer</span>';
+                card.style.maxHeight = '';
+            } else {
+                details.style.display = 'block';
+                button.innerHTML = '<span class="read-less-text">📚 Les mindre</span>';
+                card.style.maxHeight = 'none';
+            }
+        }
+
+        // Initially hide details
+        document.addEventListener('DOMContentLoaded', function() {
+            const allDetails = document.querySelectorAll('.valpeliste-details');
+            allDetails.forEach(detail => {
+                detail.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

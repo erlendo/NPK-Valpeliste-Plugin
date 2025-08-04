@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPK Valpeliste - Inline Badges Demo</title>
+    <link rel="stylesheet" href="assets/css/npk-valpeliste.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .demo-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .demo-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        .badge-explanation {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .badge-explanation h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .badge-samples {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>NPK Valpeliste - Inline Badges Demo</h1>
+            <p>Demonstration av det nye inline badge-systemet hvor badges vises sammen med Far/Mor-etikettene</p>
+        </div>
+
+        <div class="badge-explanation">
+            <h3>Badge-system:</h3>
+            <p>Badges vises nå inline med parent-informasjonen i stedet for i separate containere:</p>
+            <div class="badge-samples">
+                <span class="valpeliste-badge avlshund">Avlshund</span>
+                <span class="valpeliste-badge elitehund">Elitehund</span>
+                <span class="valpeliste-badge approved">Godkjent parring</span>
+            </div>
+        </div>
+
+        <div class="valpeliste-container">
+            <div class="valpeliste-card-container">
+                
+                <!-- Godkjent parring med inline badges -->
+                <h2 class="valpeliste-section-title approved">Godkjente parringer</h2>
+                <div class="valpeliste-card-group">
+                    <div class="valpeliste-card approved">
+                        <div class="valpeliste-card-top">
+                            <div class="valpeliste-card-header">
+                                <h3>Testkennelen</h3>
+                                <span class="valpeliste-date">Forventet: 15.06.2025</span>
+                            </div>
+                            <div class="valpeliste-info">
+                                <div class="valpeliste-info-inner">
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Oppdretter:</span> Test Oppdretter
+                                    </div>
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Sted:</span> Oslo (0123)
+                                    </div>
+                                    <div class="valpeliste-contact">
+                                        <div class="valpeliste-info-row">
+                                            <span class="valpeliste-label">Telefon:</span> 12345678
+                                        </div>
+                                        <div class="valpeliste-info-row">
+                                            <span class="valpeliste-label">E-post:</span> test@example.no
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="valpeliste-card-body expanded">
+                            <div class="valpeliste-parents">
+                                <!-- Far med både Avlshund og Elitehund badges inline -->
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Far:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Champion Dog Father (NO12345/23)</span>
+                                        <span class="valpeliste-badge avlshund">Avlshund</span>
+                                        <span class="valpeliste-badge elitehund">Elitehund</span>
+                                    </span>
+                                </div>
+                                
+                                <!-- Mor med kun Avlshund badge inline -->
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Mor:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Elite Dog Mother (NO54321/22)</span>
+                                        <span class="valpeliste-badge avlshund">Avlshund</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="valpeliste-notes">
+                                <p>Dette er en godkjent parring med to utmerkede foreldrene. Begge har avlsrettigheter, og faren har også elitestatus.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Andre parringer -->
+                <h2 class="valpeliste-section-title">Andre parringer</h2>
+                <div class="valpeliste-card-group">
+                    <div class="valpeliste-card">
+                        <div class="valpeliste-card-top">
+                            <div class="valpeliste-card-header">
+                                <h3>Annet Kennel</h3>
+                                <span class="valpeliste-date">Forventet: 20.07.2025</span>
+                            </div>
+                            <div class="valpeliste-info">
+                                <div class="valpeliste-info-inner">
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Oppdretter:</span> Anne Oppdretter
+                                    </div>
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Sted:</span> Bergen (5000)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="valpeliste-card-body expanded">
+                            <div class="valpeliste-parents">
+                                <!-- Far med kun Elitehund badge -->
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Far:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Good Dog Father (NO98765/21)</span>
+                                        <span class="valpeliste-badge elitehund">Elitehund</span>
+                                    </span>
+                                </div>
+                                
+                                <!-- Mor uten badges -->
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Mor:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Regular Dog Mother (NO11111/20)</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="valpeliste-notes">
+                                <p>Vanlig parring hvor kun faren har elitestatus. Mor er en god hund men uten spesielle utmerkelser.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parring uten badges -->
+                    <div class="valpeliste-card">
+                        <div class="valpeliste-card-top">
+                            <div class="valpeliste-card-header">
+                                <h3>Tredje Kennel</h3>
+                                <span class="valpeliste-date">Forventet: 10.08.2025</span>
+                            </div>
+                            <div class="valpeliste-info">
+                                <div class="valpeliste-info-inner">
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Oppdretter:</span> Per Oppdretter
+                                    </div>
+                                    <div class="valpeliste-info-row">
+                                        <span class="valpeliste-label">Sted:</span> Trondheim (7000)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="valpeliste-card-body expanded">
+                            <div class="valpeliste-parents">
+                                <!-- Far og mor uten badges -->
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Far:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Normal Dog Father (NO22222/19)</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="valpeliste-parent-row">
+                                    <span class="valpeliste-label">Mor:</span> 
+                                    <span class="valpeliste-parent-info">
+                                        <span class="valpeliste-value">Normal Dog Mother (NO33333/18)</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="valpeliste-notes">
+                                <p>Vanlig parring uten spesielle badges eller utmerkelser.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/npk-valpeliste.js"></script>
+</body>
+</html>
