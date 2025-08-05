@@ -9,9 +9,6 @@ class NPKDataExtractorLive {
     private float $rateLimit = 0.5; // Sekunder mellom API-kall
     private $cookieJar;
     private array $sessionCookies = [];
-    
-    // Liste over godkjente kull KUID-er i henhold til avlskriterier
-    private array $approvedLitters = [2340, 2341];
 
     public function __construct(bool $debug = false) {
         $this->debug = $debug;
@@ -22,13 +19,6 @@ class NPKDataExtractorLive {
         if (file_exists($this->cookieJar)) {
             unlink($this->cookieJar);
         }
-    }
-
-    /**
-     * Sjekk om et kull er godkjent i henhold til avlskriterier
-     */
-    public function isLitterApproved(int $kuid): bool {
-        return in_array($kuid, $this->approvedLitters);
     }
 
     /**
@@ -198,8 +188,7 @@ class NPKDataExtractorLive {
                         'KUID' => $litter['KUID'] ?? '',
                         'opprettet' => $litter['created'] ?? '',
                         'status' => $litter['status'] ?? '',
-                        'fodt' => $litter['estDate'] ?? $litter['BirthDate'] ?? '',
-                        'godkjent_avlskriterier' => $this->isLitterApproved((int)($litter['KUID'] ?? 0))
+                        'fodt' => $litter['estDate'] ?? $litter['BirthDate'] ?? ''
                     ],
                     'mor' => [
                         'navn' => $litter['MotherName_REMOVED'] ?? '',

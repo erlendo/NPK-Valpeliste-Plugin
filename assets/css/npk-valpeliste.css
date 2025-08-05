@@ -80,6 +80,15 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+.valpeliste-badge.godkjent-avl {
+    background-color: #8BC34A;
+    color: white;
+    font-weight: 600;
+    padding: 4px 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border-left: 4px solid #689F38;
+}
+
 /* Enhanced Ribbon Badge Styles */
 .ribbon-badges {
     margin: 5px 0;

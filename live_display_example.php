@@ -106,7 +106,11 @@ function npk_display_valpeliste_from_data($data) {
         $html .= '<div class="valpeliste-card-header">';
         $html .= '<h3>' . esc_html($kull['oppdretter']['kennel']) . '</h3>';
         $html .= '<span class="valpeliste-date">Forventet: ' . esc_html($kull['kull_info']['fodt']) . '</span>';
-        $html .= '</div>';
+        
+        // Godkjenningsbadge
+        if (isset($kull['kull_info']['godkjent_avlskriterier']) && $kull['kull_info']['godkjent_avlskriterier']) {
+            $html .= '<span class="valpeliste-badge godkjent-avl">Godkjent iht. avlskriterier</span>';
+        }        $html .= '</div>';
         
         // Contact info
         $html .= '<div class="valpeliste-info">';
