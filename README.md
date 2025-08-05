@@ -1,33 +1,32 @@
-# NPK Valpeliste Plugin
+# NPK Valpeliste WordPress Plugin v1.9.1
 
-WordPress plugin for displaying live puppy listings from pointer.datahound.no with real-time data fetching.
+🏆 **Live badge system with zero caching - Production Ready!**
 
-## Features
+## 🚀 Overview
 
-- **Real-time data**: Always fresh data from datahound.no API
-- **No caching**: Instant updates when new puppies are added
-- **Authenticated API**: Secure session-based authentication
-- **Responsive design**: CSS Grid layout with mobile support
-- **Badge system**: Automatic detection of breeding/elite status
-- **Debug mode**: Comprehensive debugging tools for administrators
+NPK Valpeliste is a WordPress plugin that displays live breeding data from the Norwegian Pointer Club (NPK) API with real-time elite and breeding dog badges. No caching, always fresh data.
 
-## Version History
+## ✨ Features
 
-- **v1.8.1** - Removed fallback functions, guaranteed authentic data only
-- **v1.8** - Removed all caching for real-time updates
-- **v1.7** - Fixed critical runtime errors and data structure validation
-- **v1.6** - Enhanced badge detection and layout improvements
-- **v1.5** - Initial stable release with cache system
+- **Live Badge System**: Elite and breeding dog badges from individual NPK API calls
+- **Zero Caching**: Fresh data on every page load - no WordPress transients or file storage
+- **WordPress Integration**: Simple `[npk_valpeliste]` shortcode
+- **Responsive Design**: Mobile-friendly card layout
+- **Real-time Data**: Direct connection to NPK Datahound API
+- **Error Handling**: Robust error handling and fallbacks
 
-## Installation
+## 🔧 Installation
 
-1. Upload the plugin folder to `/wp-content/plugins/`
-2. Activate the plugin through WordPress admin
-3. Configure settings under NPK Valpeliste in admin menu
+1. **Download** the production build: `builds/NPK_Valpeliste_v1.9_WordPress_Plugin.zip`
+2. **Upload** to WordPress via `Plugins → Add New → Upload Plugin`
+3. **Activate** the plugin
+4. **Use** the shortcode `[npk_valpeliste]` in any page or post
 
-## Usage
+## 📋 Usage
 
-### Basic Shortcode
+```php
+// Simple shortcode usage
+[npk_valpeliste]
 ```
 [valpeliste]
 ```

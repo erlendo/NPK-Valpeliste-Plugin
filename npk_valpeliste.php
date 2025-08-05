@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: Pointer Valpeliste
+ * Plugin Name: NPK Valpeliste
  * Plugin URI: https://pointer.no
- * Description: En shortcode for å vise valpeliste fra pointer.datahound.no med inline badge-layout
- * Version: 1.8.1
- * Author: Erlendo
+ * Description: Viser NPK valpeliste med live badge data uten caching
+ * Version: 1.9.1
+ * Author: NPK Plugin Team
  * Author URI: 
  * Text Domain: npk-valpeliste
  * Domain Path: /languages
@@ -18,11 +18,13 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('NPK_VALPELISTE_VERSION', '1.8.1');
+define('NPK_VALPELISTE_VERSION', '1.9.1');
 define('NPK_VALPELISTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('NPK_VALPELISTE_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Include admin settings
+// Include core classes
+require_once NPK_VALPELISTE_PLUGIN_DIR . 'NPKDataExtractorLive.php';
+require_once NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php';
 require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/admin-settings.php';
 
 // Include helper functions

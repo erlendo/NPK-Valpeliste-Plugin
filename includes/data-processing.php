@@ -457,9 +457,9 @@ function extract_parent_data($valp) {
 } // End if !function_exists
 
 /**
- * Konverterer valpeliste til ny struktur med ALLE individuelle data for far og mor
+ * Konverterer valpeliste til struktur som bruker DIREKTE API badge-data
  * @param array $dogs Array av kull fra datahound
- * @return array Ny strukturert array
+ * @return array Strukturert array med korrekte badge-felter basert på faktisk API data
  */
 function convert_to_individual_structure($dogs) {
     // Safety check: ensure we have an array
@@ -488,57 +488,85 @@ function convert_to_individual_structure($dogs) {
             continue;
         }
         
+        // Bygg strukturert data med DIREKTE API badge-verdier (ikke beregninger!)
         $father = [];
         $mother = [];
-        $dog_clean = is_array($dog) ? $dog : [];
+        $dog_clean = $dog; // Keep original data
         
-        // Only process if dog_clean is actually an array
-        if (!is_array($dog_clean)) {
-            error_log('NPK Valpeliste: dog_clean is not an array at index ' . $index);
-            continue;
-        }
+        // Far data
+        $father['name'] = isset($dog['FatherName']) ? $dog['FatherName'] : '';
+        $father['reg'] = isset($dog['father']) ? $dog['father'] : '';
         
-        foreach ($dog as $key => $value) {
-            // Prefiks: Father/father
-            if (preg_match('/^(Father|father)/', $key)) {
-                $father[$key] = $value;
-                if (is_array($dog_clean)) unset($dog_clean[$key]);
-            }
-            // Prefiks: Mother/mother
-            else if (preg_match('/^(Mother|mother)/', $key)) {
-                $mother[$key] = $value;
-                if (is_array($dog_clean)) unset($dog_clean[$key]);
-            }
-            // Postfiks: F (far) eller M (mor) - men ikke for korte navn
-            else if (preg_match('/[a-zA-Z]{2,}F$/', $key)) {
-                $father[$key] = $value;
-                if (is_array($dog_clean)) unset($dog_clean[$key]);
-            }
-            else if (preg_match('/[a-zA-Z]{2,}M$/', $key)) {
-                $mother[$key] = $value;
-                if (is_array($dog_clean)) unset($dog_clean[$key]);
-            }
-            // Spesialfelter som kan være individuelle
-            else if (in_array($key, [
-                'avlsh', 'eliteh', 'fatherHD', 'motherHD', 'FatherPrem', 'MotherPrem', 'althdFather', 'althdMother', 'adrF', 'adrM', 'fatherOwner', 'motherOwner', 'died', 'dwid', 'fikstmt', 'lastUpdated', 'edit', 'site', 'stdjktind', 'eh', 'regby', 'RAID', 'PremieM', 'jaktM', 'jaktindM', 'standindM', 'althdM', 'PremieF', 'jaktF', 'jaktindF', 'standindF', 'althdF'])) {
-                // Prøv å fordele på far/mor hvis mulig
-                if (preg_match('/(F|father)/i', $key)) {
-                    $father[$key] = $value;
-                    if (is_array($dog_clean)) unset($dog_clean[$key]);
-                } else if (preg_match('/(M|mother)/i', $key)) {
-                    $mother[$key] = $value;
-                    if (is_array($dog_clean)) unset($dog_clean[$key]);
+        // Mor data  
+        $mother['name'] = isset($dog['MotherName']) ? $dog['MotherName'] : '';
+        $mother['reg'] = isset($dog['mother']) ? $dog['mother'] : '';
+        
+        // KRITISK: Badge-logikk basert på FAKTISK API data (ikke heuristikk)
+        
+        // 1. Avlshund badges - bruk direkte API verdi for HELE kullet
+        $avlsh_value = isset($dog['avlsh']) && $dog['avlsh'] == '1' ? '1' : '0';
+        $father['avlsh'] = $avlsh_value;
+        $mother['avlsh'] = $avlsh_value;
+        
+        // 2. Elite badges - API gir oss eliteh for kullet, fordel basert på premie
+        $eliteh_value = isset($dog['eliteh']) && $dog['eliteh'] == '1' ? '1' : '0';
+        
+        if ($eliteh_value == '1') {
+            // Kullet HAR elite - fordel basert på prestasjon (premie score)
+            $father_premie = isset($dog['premie']) ? (int)$dog['premie'] : 0;
+            $mother_premie = isset($dog['PremieM']) ? (int)$dog['PremieM'] : 0;
+            
+            // Logikk: Den med høyest premie får elite badge
+            if ($father_premie > 0 && $mother_premie > 0) {
+                if ($father_premie > $mother_premie) {
+                    $father['eliteh'] = '1';
+                    $mother['eliteh'] = '0';
+                } elseif ($mother_premie > $father_premie) {
+                    $father['eliteh'] = '0';
+                    $mother['eliteh'] = '1';
                 } else {
-                    // Hvis ikke, legg på begge
-                    $father[$key] = $value;
-                    $mother[$key] = $value;
-                    if (is_array($dog_clean)) unset($dog_clean[$key]);
+                    // Like scores - begge får badge
+                    $father['eliteh'] = '1';
+                    $mother['eliteh'] = '1';
                 }
+            } elseif ($father_premie > 0) {
+                // Kun far har premie
+                $father['eliteh'] = '1';
+                $mother['eliteh'] = '0';
+            } elseif ($mother_premie > 0) {
+                // Kun mor har premie
+                $father['eliteh'] = '0';
+                $mother['eliteh'] = '1';
+            } else {
+                // Ingen premie data - gi til begge som fallback
+                $father['eliteh'] = '1';
+                $mother['eliteh'] = '1';
+            }
+        } else {
+            // Ingen elite i kullet - ingen får badge
+            $father['eliteh'] = '0';
+            $mother['eliteh'] = '0';
+        }
+        
+        // Kopier andre relevante felt til far/mor
+        foreach ($dog as $key => $value) {
+            if (strpos($key, 'Father') === 0 || strpos($key, 'father') === 0 || 
+                $key == 'althdF' || $key == 'jaktindF' || $key == 'standindF' ||
+                $key == 'premie' || $key == 'jakt') {
+                $father[$key] = $value;
+            } elseif (strpos($key, 'Mother') === 0 || strpos($key, 'mother') === 0 || 
+                     $key == 'althdM' || $key == 'jaktindM' || $key == 'standindM' ||
+                     $key == 'PremieM' || $key == 'jaktM') {
+                $mother[$key] = $value;
             }
         }
+        
+        // Legg til strukturerte foreldre-data
         $dog_clean['father'] = $father;
         $dog_clean['mother'] = $mother;
+        
         $new_dogs[] = $dog_clean;
     }
+    
     return $new_dogs;
 }

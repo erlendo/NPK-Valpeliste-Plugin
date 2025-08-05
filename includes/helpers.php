@@ -23,11 +23,31 @@ if (!function_exists('get_safe_value')) {
             $keys = [$keys];
         }
         
-        foreach ($keys as $key) {
-            if (is_object($data) && isset($data->$key)) {
-                return $data->$key;
-            } elseif (is_array($data) && isset($data[$key])) {
-                return $data[$key];
+        foreach ($keys as $key_path) {
+            $current_data = $data;
+            
+            // Handle nested paths like ['father', 'FatherReg']
+            if (is_array($key_path)) {
+                foreach ($key_path as $key) {
+                    if (is_object($current_data) && isset($current_data->$key)) {
+                        $current_data = $current_data->$key;
+                    } elseif (is_array($current_data) && isset($current_data[$key])) {
+                        $current_data = $current_data[$key];
+                    } else {
+                        $current_data = null;
+                        break;
+                    }
+                }
+                if ($current_data !== null) {
+                    return $current_data;
+                }
+            } else {
+                // Handle simple keys
+                if (is_object($data) && isset($data->$key_path)) {
+                    return $data->$key_path;
+                } elseif (is_array($data) && isset($data[$key_path])) {
+                    return $data[$key_path];
+                }
             }
         }
         
@@ -75,243 +95,174 @@ function get_dog_status($valp, $parent = 'father', $debug_mode = false) {
         'elitehund_reason' => '',
     ];
     
-    // Get configuration settings with defaults
-    $criteria_config = get_option('npk_valpeliste_criteria', [
-        'strict_mode' => true,   // If true, only use avlsh="1" flag - default to strict mode for safety
-        'use_hd_status' => false, // Use HD status as criterion - turning off by default
-        'use_name_check' => false, // Check if "avlsh" exists in dog's name - turning off by default
-        'use_field_checks' => false, // Check other fields that may indicate avlshund - turning off by default
-        'use_jakt_scores' => true, // Use jakt score for elite status
-        'hd_threshold' => 100,  // HD score threshold
-        'jakt_threshold' => 115, // Jakt score threshold
-        'override_dogs' => []    // Liste med hunder som skal overstyres
-    ]);
-    
-    // Sjekk om denne hunden skal overstyres manuelt
+    // Get parent name and registration info
     $dog_reg = '';
     $dog_name = '';
     if ($parent == 'father') {
-        $dog_reg = get_safe_value($valp, ['father', 'FatherReg'], '');
-        $dog_name = get_safe_value($valp, ['FatherName', 'father'], '');
+        $father_data = get_safe_value($valp, ['father'], []);
+        $dog_reg = get_safe_value($father_data, ['FatherReg'], '');
+        if (empty($dog_reg)) {
+            $dog_reg = get_safe_value($valp, ['FatherReg'], '');
+        }
+        
+        $dog_name = get_safe_value($father_data, ['FatherName'], '');
+        if (empty($dog_name)) {
+            $dog_name = get_safe_value($valp, ['FatherName'], '');
+        }
     } else {
-        $dog_reg = get_safe_value($valp, ['mother', 'MotherReg'], '');
-        $dog_name = get_safe_value($valp, ['MotherName', 'mother'], '');
+        $mother_data = get_safe_value($valp, ['mother'], []);
+        $dog_reg = get_safe_value($mother_data, ['MotherReg'], '');
+        if (empty($dog_reg)) {
+            $dog_reg = get_safe_value($valp, ['MotherReg'], '');
+        }
+        
+        $dog_name = get_safe_value($mother_data, ['MotherName'], '');
+        if (empty($dog_name)) {
+            $dog_name = get_safe_value($valp, ['MotherName'], '');
+        }
+    }
+    
+    // Get configuration settings with defaults
+    $criteria_config = get_option('npk_valpeliste_criteria', [
+        'override_dogs' => []
+    ]);
+    
+    // Safety check for configuration
+    if (!is_array($criteria_config)) {
+        $criteria_config = ['override_dogs' => []];
+    }
+    if (!isset($criteria_config['override_dogs']) || !is_array($criteria_config['override_dogs'])) {
+        $criteria_config['override_dogs'] = [];
     }
     
     // Specific fixes for problematic dogs
-    // Check the exact names of dogs that should NOT have the badge
     $excluded_dogs = array(
         "Brennmoen's Mattis", 
         "Sølenriket's E- Bella",
-        // Add more dogs here as needed
     );
     
     if (in_array($dog_name, $excluded_dogs)) {
         if ($debug_mode) {
             $result['debug_info']['excluded_dog'] = "This dog is specifically excluded from badges";
         }
-        return $result; // Return early with no badges
+        return $result;
     }
     
-    $override_dogs = !empty($criteria_config['override_dogs']) ? $criteria_config['override_dogs'] : [];
-    if (!empty($dog_reg) && is_array($override_dogs) && isset($override_dogs[$dog_reg])) {
-        $override = $override_dogs[$dog_reg];
-        if (isset($override['avlshund'])) {
-            $result['avlshund'] = (bool)$override['avlshund'];
-            $result['avlshund_reason'] = 'Manuell overstyring';
-        }
-        if (isset($override['elitehund'])) {
-            $result['elitehund'] = (bool)$override['elitehund'];
-            $result['elitehund_reason'] = 'Manuell overstyring';
-        }
-        
+    // Skip manual overrides for now to debug badge system
+    // Ny implementering: Bruker forbehandlede data fra data-processing.php
+    $parent_data = get_safe_value($valp, [$parent], []);
+    
+    if (empty($parent_data)) {
         if ($debug_mode) {
-            $result['manual_override'] = true;
-        }
-        
-        // Hvis total overstyring, returner resultatet direkte
-        if (!empty($override['total_override'])) {
-            return $result;
-        }
-    }
-    
-    // Field mappings based on parent type
-    $field_prefix = ($parent == 'father') ? 'father' : 'mother';
-    
-    // Først sjekker vi om valpen har 'avlsh' for far og 'avlshM' for mor
-    // Men undersøkelse viser at databasen bruker 'avlsh' for begge,
-    // så derfor sjekker vi begge feltene for sikkerhetsskyld
-    $flag_field = 'avlsh'; 
-    $elite_field = ($parent == 'father') ? 'eliteh' : 'elitehM';
-    $hd_field = $field_prefix . 'HD';
-    $jakt_field = 'jaktind' . ($parent == 'father' ? 'F' : 'M');
-    $name_field = ($parent == 'father') ? ['FatherName', 'father'] : ['MotherName', 'mother'];
-    $status_prefix = ($parent == 'father') ? ['far', 'father'] : ['mor', 'mother'];
-    
-    // Get parent name for checking
-    $parent_name = strtolower(get_safe_value($valp, $name_field, ''));
-    
-    // Debugging - la oss lagre verdien av alle felt som kan være relevante
-    if ($debug_mode) {
-        $debug_fields = [
-            'avlsh', 'avlshM', 'eliteh', 'elitehM', 
-            'fatherHD', 'motherHD', 'FatherPrem', 'MotherPrem',
-            'althdF', 'althdM', 'jaktindF', 'jaktindM'
-        ];
-        
-        $result['debug_info'] = [];
-        foreach ($debug_fields as $field) {
-            if (is_string($field) && isset($valp[$field])) {
-                $result['debug_info'][$field] = $valp[$field];
-            } else {
-                $result['debug_info'][$field] = 'ikke satt';
-            }
-        }
-        
-        // Sjekk også FatherName og MotherName
-        $result['debug_info']['FatherName'] = get_safe_value($valp, 'FatherName', 'ikke satt');
-        $result['debug_info']['MotherName'] = get_safe_value($valp, 'MotherName', 'ikke satt');
-    }
-    
-    // Sjekk først om strengt modus er aktivert
-    $strict_mode = !empty($criteria_config['strict_mode']);
-    
-    // 1. Check direct avlsh flag - this always has priority
-    if (is_string($flag_field) && isset($valp[$flag_field]) && $valp[$flag_field] == '1') {
-        $result['avlshund'] = true;
-        $result['avlshund_reason'] = $flag_field . '="1"';
-    }
-    
-    if (is_string($elite_field) && isset($valp[$elite_field]) && $valp[$elite_field] == '1') {
-        $result['elitehund'] = true;
-        $result['elitehund_reason'] = $elite_field . '="1"';
-    }
-    
-    // Stop here if strict mode is enabled
-    if ($strict_mode) {
-        if ($debug_mode) {
-            $result['strict_mode_active'] = true;
+            $result['debug_info']['error'] = "Ingen parent data funnet for $parent";
         }
         return $result;
     }
     
-    // 2. HD status check
-    if (!empty($criteria_config['use_hd_status'])) {
-        $hd_threshold = !empty($criteria_config['hd_threshold']) ? intval($criteria_config['hd_threshold']) : 100;
-        
-        // Sjekk både direkte feltene og alternativene
-        $hd_fields = [$hd_field];
-        if ($parent == 'father') {
-            $hd_fields[] = 'althdF';
-            $hd_fields[] = 'althdFather';
-        } else {
-            $hd_fields[] = 'althdM';
-            $hd_fields[] = 'althdMother';
-        }
-        
-        foreach ($hd_fields as $curr_hd_field) {
-            if (is_string($curr_hd_field) && isset($valp[$curr_hd_field]) && !empty($valp[$curr_hd_field])) {
-                // Sjekk om verdien er numerisk og over terskelen
-                $hd_value = $valp[$curr_hd_field];
-                if (is_numeric($hd_value) && intval($hd_value) > $hd_threshold) {
-                    $result['avlshund'] = true;
-                    $result['avlshund_reason'] = $curr_hd_field . '=' . $hd_value;
-                    break; // Stopp etter første match
-                }
-            }
-        }
-    }
+    $avlsh_value = get_safe_value($parent_data, ['avlsh'], '');
+    $eliteh_value = get_safe_value($parent_data, ['eliteh'], '');
     
-    // 3. Check for "avlshund" in name - be more precise to avoid false positives
-    if (!empty($criteria_config['use_name_check']) && !empty($parent_name)) {
-        // Create a more specific check for "avlshund" in the name
-        // We're looking for the exact word "avlshund" or "avlsh"
-        if (preg_match('/\bavlshund\b/i', $parent_name) || preg_match('/\bavlsh\b/i', $parent_name)) {
-            $result['avlshund'] = true;
-            $result['avlshund_reason'] = 'navn inneholder "avlshund"';
-        }
-        // Similarly for "elite"
-        if (preg_match('/\belite\b/i', $parent_name)) {
-            $result['elitehund'] = true;
-            $result['elitehund_reason'] = 'navn inneholder "elite"';
-        }
-    }
-    
-    // 4. Check related fields for status indicators
-    if (!empty($criteria_config['use_field_checks'])) {
-        $status_fields = [
-            'FatherPrem', 'MotherPrem', 'comments', 'vpltooltip', 
-            'premie', 'PremieM', 'jakt', 'jaktM', 'althdF', 'althdM'
+    // Debug info
+    if ($debug_mode) {
+        $result['debug_info'] = [
+            'parent' => $parent,
+            'parent_data' => $parent_data,
+            'avlsh_value' => $avlsh_value,
+            'eliteh_value' => $eliteh_value,
+            'dog_name' => $dog_name,
+            'dog_reg' => $dog_reg
         ];
-        
-        foreach ($status_fields as $field) {
-            if (is_string($field) && isset($valp[$field]) && !empty($valp[$field])) {
-                $value = strtolower($valp[$field]);
-                
-                // Check for avlshund indicators - use more precise regex pattern
-                // We're looking for entire words, not substrings
-                if (preg_match('/\bavlshund\b/i', $value) || preg_match('/\bavlsh\b/i', $value)) {
-                    // Try to determine which parent this refers to
-                    $is_relevant = false;
-                    
-                    // Check if field contains parent reference
-                    foreach ($status_prefix as $prefix) {
-                        if (strpos($value, $prefix) !== false) {
-                            $is_relevant = true;
-                            break;
-                        }
-                    }
-                    
-                    // Check if field is directly related to this parent - be more strict
-                    if ($field === 'FatherPrem' && $parent == 'father') $is_relevant = true;
-                    if ($field === 'MotherPrem' && $parent == 'mother') $is_relevant = true;
-                    if ($field === 'althdF' && $parent == 'father') $is_relevant = true;
-                    if ($field === 'althdM' && $parent == 'mother') $is_relevant = true;
-                    
-                    if ($is_relevant) {
-                        $result['avlshund'] = true;
-                        $result['avlshund_reason'] = 'felt ' . $field . ' har "avlshund"';
-                    }
-                }
-                
-                // Check for elitehund indicators
-                if (strpos($value, 'elite') !== false) {
-                    // Try to determine which parent this refers to
-                    $is_relevant = false;
-                    
-                    // Check if field contains parent reference
-                    foreach ($status_prefix as $prefix) {
-                        if (strpos($value, $prefix) !== false) {
-                            $is_relevant = true;
-                            break;
-                        }
-                    }
-                    
-                    // Check if field is directly related to this parent
-                    if ($field === 'FatherPrem' && $parent == 'father') $is_relevant = true;
-                    if ($field === 'MotherPrem' && $parent == 'mother') $is_relevant = true;
-                    if ($field === 'althdF' && $parent == 'father') $is_relevant = true;
-                    if ($field === 'althdM' && $parent == 'mother') $is_relevant = true;
-                    
-                    if ($is_relevant) {
-                        $result['elitehund'] = true;
-                        $result['elitehund_reason'] = 'felt ' . $field . ' har "elite"';
-                    }
-                }
-            }
-        }
     }
     
-    // 5. Check jakt scores for elite status
-    if (!empty($criteria_config['use_jakt_scores'])) {
-        $jakt_threshold = !empty($criteria_config['jakt_threshold']) ? intval($criteria_config['jakt_threshold']) : 115;
-        
-        if (isset($valp[$jakt_field]) && is_numeric($valp[$jakt_field]) && intval($valp[$jakt_field]) > $jakt_threshold) {
-            $result['elitehund'] = true;
-            $result['elitehund_reason'] = $jakt_field . '=' . $valp[$jakt_field];
-        }
+    // Sjekk avlshund status (ny logikk fra data-processing.php)
+    if ($avlsh_value == '1' || $avlsh_value === 1) {
+        $result['avlshund'] = true;
+        $result['avlshund_reason'] = 'Individuell avlshund status (API)';
+    }
+    
+    // Sjekk elitehund status (ny logikk fra data-processing.php)  
+    if ($eliteh_value == '1' || $eliteh_value === 1) {
+        $result['elitehund'] = true;
+        $result['elitehund_reason'] = 'Individuell elitehund status (API)';
     }
     
     return $result;
-} // End function get_dog_status
-} // End if !function_exists
+}
+}
+
+/**
+ * Parse and render premium ribbon HTML from Datahound API
+ * @param string $ribbon_html Raw HTML from FatherPrem/MotherPrem fields
+ * @return string Processed HTML for display
+ */
+if (!function_exists('parse_premium_ribbons')) {
+    function parse_premium_ribbons($ribbon_html) {
+        if (empty($ribbon_html)) {
+            return '';
+        }
+        
+        $output = '';
+        
+        // Extract all img tags from the ribbon HTML
+        if (preg_match_all('/<img[^>]*>/i', $ribbon_html, $matches)) {
+            foreach ($matches[0] as $img_tag) {
+                // Extract tooltip text
+                $tooltip = '';
+                if (preg_match('/qtip=["\']([^"\']*)["\']/', $img_tag, $qtip_matches)) {
+                    $tooltip = $qtip_matches[1];
+                }
+                
+                // Extract image source
+                $src = '';
+                if (preg_match('/src=["\']([^"\']*)["\']/', $img_tag, $src_matches)) {
+                    $src = $src_matches[1];
+                    
+                    // Convert relative URLs to absolute URLs for Datahound domain
+                    if (strpos($src, '/') === 0) {
+                        $src = 'https://pointer.datahound.no' . $src;
+                    }
+                }
+                
+                // Determine badge type from image source or tooltip
+                $badge_class = 'ribbon-badge';
+                $badge_text = $tooltip;
+                
+                if (stripos($src, 'ribbon_red') !== false || stripos($tooltip, 'utstilling') !== false) {
+                    $badge_class .= ' ribbon-exhibition';
+                    if (empty($badge_text)) $badge_text = 'Utstillingspremie';
+                } elseif (stripos($src, 'ribbon_darkblue') !== false || stripos($tooltip, 'jakt') !== false) {
+                    $badge_class .= ' ribbon-hunt';
+                    if (empty($badge_text)) $badge_text = 'Jaktpremie';
+                } elseif (stripos($src, 'ribbon_blue') !== false) {
+                    $badge_class .= ' ribbon-blue';
+                    if (empty($badge_text)) $badge_text = 'Blå bånd';
+                } elseif (stripos($src, 'ribbon_yellow') !== false) {
+                    $badge_class .= ' ribbon-yellow';
+                    if (empty($badge_text)) $badge_text = 'Gult bånd';
+                }
+                
+                // Create enhanced ribbon display
+                if (!empty($src)) {
+                    $output .= '<span class="' . htmlspecialchars($badge_class, ENT_QUOTES) . '" title="' . htmlspecialchars($badge_text, ENT_QUOTES) . '">';
+                    $output .= '<img src="' . htmlspecialchars($src, ENT_QUOTES) . '" alt="' . htmlspecialchars($badge_text, ENT_QUOTES) . '" class="ribbon-image" />';
+                    $output .= '<span class="ribbon-text">' . htmlspecialchars($badge_text, ENT_QUOTES) . '</span>';
+                    $output .= '</span>';
+                } else {
+                    // Fallback if no image source found
+                    $output .= '<span class="' . htmlspecialchars($badge_class, ENT_QUOTES) . '" title="' . htmlspecialchars($badge_text, ENT_QUOTES) . '">';
+                    if (stripos($badge_text, 'utstilling') !== false) {
+                        $output .= '🏵️ ';
+                    } elseif (stripos($badge_text, 'jakt') !== false) {
+                        $output .= '🎖️ ';
+                    } else {
+                        $output .= '🏆 ';
+                    }
+                    $output .= htmlspecialchars($badge_text, ENT_QUOTES);
+                    $output .= '</span>';
+                }
+            }
+        }
+        
+        return $output;
+    }
+}

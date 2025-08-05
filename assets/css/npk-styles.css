@@ -1,0 +1,353 @@
+/* NPK Valpeliste Styles - Produksjon v1.9.1 */
+
+.npk-valpeliste {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+}
+
+/* Header */
+.npk-header {
+    border-bottom: 2px solid #2c5282;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+}
+
+.npk-header h2 {
+    color: #2c5282;
+    font-size: 2.2em;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.npk-metadata {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.npk-refresh-btn {
+    background: #2c5282;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.npk-refresh-btn:hover {
+    background: #2a4a7a;
+}
+
+/* Statistics */
+.npk-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c5282;
+}
+
+/* Litter Cards */
+.npk-litters {
+    display: grid;
+    gap: 25px;
+}
+
+.npk-litter-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 25px;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.npk-litter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.litter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.litter-header h3 {
+    color: #1a365d;
+    font-size: 1.4em;
+    margin: 0;
+    font-weight: 600;
+}
+
+.kennel-name {
+    background: #e2e8f0;
+    color: #2d3748;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* Parents Container */
+.parents-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+@media (max-width: 768px) {
+    .parents-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.parent-info {
+    padding: 20px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border-left: 4px solid transparent;
+}
+
+.parent-info.mother {
+    border-left-color: #e91e63;
+    background: #fdf2f8;
+}
+
+.parent-info.father {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.parent-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    color: #1a365d;
+    font-weight: 600;
+}
+
+.registration-number {
+    font-family: 'Courier New', monospace;
+    color: #666;
+    font-size: 0.9em;
+    margin: 0 0 12px 0;
+    background: rgba(255,255,255,0.7);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Badges */
+.badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge.elite {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #744210;
+    border: 2px solid #f59e0b;
+}
+
+.badge.avl {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
+    border: 2px solid #059669;
+}
+
+.no-badges {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+/* Breeder Info */
+.breeder-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.breeder-info h5 {
+    margin: 0 0 10px 0;
+    color: #374151;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.breeder-name {
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.phone, .email {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #6b7280;
+}
+
+.email a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.email a:hover {
+    text-decoration: underline;
+}
+
+/* Ad Text */
+.ad-text {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 20px;
+}
+
+.ad-text h5 {
+    margin: 0 0 15px 0;
+    color: #374151;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.ad-content {
+    line-height: 1.6;
+    color: #4b5563;
+    font-size: 0.95em;
+}
+
+.ad-content p {
+    margin-bottom: 12px;
+}
+
+/* Footer */
+.npk-footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9ca3af;
+    font-size: 0.85em;
+}
+
+/* Error Styling */
+.npk-error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #dc2626;
+    margin: 20px 0;
+}
+
+/* Loading States */
+.npk-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #6b7280;
+}
+
+.npk-loading::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .npk-valpeliste {
+        padding: 15px;
+    }
+    
+    .npk-metadata {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .npk-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .litter-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .badges {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .npk-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .npk-header h2 {
+        font-size: 1.8em;
+    }
+}

@@ -172,10 +172,20 @@ function generatePuppyCard($valp, $is_approved = false) {
             'adrF' => 'Adresse',
             'fatherOwner' => 'Eier',
         ];
+        
+        // Enhanced ribbon display for father
         if (!empty($valp['father']['FatherPrem'])) {
-            $output .= '<li><span title="Utstillingspremie">🏵️ (utstilling)</span></li>';
+            $father_ribbons = parse_premium_ribbons($valp['father']['FatherPrem']);
+            if (!empty($father_ribbons)) {
+                $output .= '<li class="ribbon-badges">' . $father_ribbons . '</li>';
+            } else {
+                // Fallback to emoji if parsing fails
+                $output .= '<li><span title="Utstillingspremie">🏵️ (utstilling)</span></li>';
+            }
         }
-        if (!empty($valp['father']['jaktindF']) || !empty($valp['father']['jaktM'])) {
+        
+        // Legacy hunt badge check (keeping as backup)
+        if (empty($valp['father']['FatherPrem']) && (!empty($valp['father']['jaktindF']) || !empty($valp['father']['jaktM']))) {
             $output .= '<li><span title="Jaktpremie">🎖️ (jakt)</span></li>';
         }
         foreach ($father_fields as $key => $label) {
@@ -228,10 +238,20 @@ function generatePuppyCard($valp, $is_approved = false) {
             'adrM' => 'Adresse',
             'motherOwner' => 'Eier',
         ];
+        
+        // Enhanced ribbon display for mother
         if (!empty($valp['mother']['MotherPrem'])) {
-            $output .= '<li><span title="Utstillingspremie">🏵️ (utstilling)</span></li>';
+            $mother_ribbons = parse_premium_ribbons($valp['mother']['MotherPrem']);
+            if (!empty($mother_ribbons)) {
+                $output .= '<li class="ribbon-badges">' . $mother_ribbons . '</li>';
+            } else {
+                // Fallback to emoji if parsing fails
+                $output .= '<li><span title="Utstillingspremie">🏵️ (utstilling)</span></li>';
+            }
         }
-        if (!empty($valp['mother']['jaktindM']) || !empty($valp['mother']['jaktF'])) {
+        
+        // Legacy hunt badge check (keeping as backup)
+        if (empty($valp['mother']['MotherPrem']) && (!empty($valp['mother']['jaktindM']) || !empty($valp['mother']['jaktF']))) {
             $output .= '<li><span title="Jaktpremie">🎖️ (jakt)</span></li>';
         }
         foreach ($mother_fields as $key => $label) {

@@ -80,6 +80,69 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Enhanced Ribbon Badge Styles */
+.ribbon-badges {
+    margin: 5px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ribbon-badge {
+    display: inline-flex;
+    align-items: center;
+    margin: 2px 4px 2px 0;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    font-size: 0.85em;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.ribbon-badge:hover {
+    background-color: #e9ecef;
+}
+
+.ribbon-badge.ribbon-exhibition {
+    background-color: #dc3545;
+    color: white;
+    border-color: #bd2130;
+}
+
+.ribbon-badge.ribbon-hunt {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+.ribbon-badge.ribbon-blue {
+    background-color: #17a2b8;
+    color: white;
+    border-color: #117a8b;
+}
+
+.ribbon-badge.ribbon-yellow {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #d39e00;
+}
+
+.ribbon-image {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+.ribbon-text {
+    font-weight: 500;
+    font-size: 0.9em;
+    line-height: 1.2;
+}
+
 /* Parent rows using grid instead of flex */
 .valpeliste-parent-row {
     margin-bottom: 8px;
