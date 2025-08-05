@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# NPK Valpeliste Plugin Build Script v1.9
-echo "🔨 Building NPK Valpeliste Plugin v1.9 for Production..."
+# NPK Valpeliste Plugin Build Script v1.9.1
+echo "🔨 Building NPK Valpeliste Plugin v1.9.1 for Production..."
 
 # Get current directory name for plugin
 PLUGIN_NAME="NPK_Valpeliste"
-PLUGIN_VERSION="1.9"
-VERSION="1.9"
+PLUGIN_VERSION="1.9.1"
+VERSION="1.9.1"
 BUILD_DIR="builds"
 ZIP_NAME="${PLUGIN_NAME}_v${VERSION}.zip"
 DIST_NAME="${PLUGIN_NAME}_v${VERSION}_WordPress_Plugin.zip"
@@ -31,6 +31,8 @@ rm -f verification.log
 echo "📋 Checking required files..."
 required_files=(
     "npk_valpeliste.php"
+    "NPKDataExtractorLive.php"
+    "live_display_example.php"
     "includes/helpers.php"
     "includes/data-processing.php"
     "includes/rendering.php"
@@ -69,6 +71,8 @@ echo "📁 Copying production files..."
 cp -r includes "$TEMP_DIR/$PLUGIN_NAME/"
 cp -r assets "$TEMP_DIR/$PLUGIN_NAME/"
 cp npk_valpeliste.php "$TEMP_DIR/$PLUGIN_NAME/"
+cp NPKDataExtractorLive.php "$TEMP_DIR/$PLUGIN_NAME/"
+cp live_display_example.php "$TEMP_DIR/$PLUGIN_NAME/"
 cp readme.txt "$TEMP_DIR/$PLUGIN_NAME/"
 cp index.php "$TEMP_DIR/$PLUGIN_NAME/"
 cp README.md "$TEMP_DIR/$PLUGIN_NAME/"
