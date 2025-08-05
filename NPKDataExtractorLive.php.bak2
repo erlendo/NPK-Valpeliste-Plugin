@@ -209,7 +209,7 @@ class NPKDataExtractorLive {
                     'oppdretter' => [
                         'navn' => $litter['EierNavn'] ?? '',
                         'kennel' => $litter['kennel'] ?? '',
-                        'sted' => ($litter['place'] ?? '') . ($litter['zip'] ? ' (' . $litter['zip'] . ')' : ''),
+                        'sted' => $litter['BreederZip'] ?? $litter['BreederCity'] ?? '',
                         'kontakt' => [
                             'telefon' => $litter['phone'] ?? '',
                             'epost' => $litter['email'] ?? ''
@@ -222,7 +222,6 @@ class NPKDataExtractorLive {
                 if (!empty($kullData['mor']['registreringsnummer'])) {
                     $morStatus = $this->getEliteStatus($kullData['mor']['registreringsnummer']);
                     if ($morStatus['status'] === 'SUCCESS') {
-                        $kullData['mor']['navn'] = $morStatus['navn'] ?? '';
                         $kullData['mor']['elitehund'] = $morStatus['elitehund'];
                         $kullData['mor']['avlshund'] = $morStatus['avlshund'];
                     }
@@ -232,7 +231,6 @@ class NPKDataExtractorLive {
                 if (!empty($kullData['far']['registreringsnummer'])) {
                     $farStatus = $this->getEliteStatus($kullData['far']['registreringsnummer']);
                     if ($farStatus['status'] === 'SUCCESS') {
-                        $kullData['far']['navn'] = $farStatus['navn'] ?? '';
                         $kullData['far']['elitehund'] = $farStatus['elitehund'];
                         $kullData['far']['avlshund'] = $farStatus['avlshund'];
                     }
