@@ -135,13 +135,12 @@ Badges are fetched live from individual dog API calls for accurate status.
 ```
 npk_valpeliste.php              # Main plugin file
 NPKDataExtractorLive.php        # Live API extractor with complete mapping
-live_display_example.php        # Shortcode implementation with breeding approval
+live_display_example.php        # Shortcode implementation
 assets/
-├── css/npk-valpeliste.css     # Production styles with breeding badges
-└── js/npk-valpeliste.js       # Production JavaScript
+├── css/npk-styles.css         # Production styles
+└── js/npk-scripts.js          # Production JavaScript
 includes/                       # WordPress specific files
-builds/                        # Production builds (ready for deployment)
-archive/                       # Development files and tests (archived)
+builds/                        # Production builds
 ```
 
 ## 🛠️ Development
@@ -150,10 +149,8 @@ archive/                       # Development files and tests (archived)
 # Build production version
 ./build.sh
 
-# Test breeding approval functionality
-php archive/tests/test_breeding_simple.php
-
-# All development files archived in archive/ directory
+# Test complete data extraction
+php test_data_completeness.php
 ```
 
 ## 📊 Performance
