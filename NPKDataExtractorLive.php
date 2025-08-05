@@ -187,7 +187,8 @@ class NPKDataExtractorLive {
                     'kull_info' => [
                         'KUID' => $litter['KUID'] ?? '',
                         'opprettet' => $litter['created'] ?? '',
-                        'status' => $litter['status'] ?? ''
+                        'status' => $litter['status'] ?? '',
+                        'fodt' => $litter['ExpectedDate'] ?? $litter['BirthDate'] ?? ''
                     ],
                     'mor' => [
                         'navn' => $litter['MotherName'] ?? '',
@@ -208,6 +209,7 @@ class NPKDataExtractorLive {
                     'oppdretter' => [
                         'navn' => $litter['BreederName'] ?? '',
                         'kennel' => $litter['kennel'] ?? '',
+                        'sted' => $litter['BreederZip'] ?? $litter['BreederCity'] ?? '',
                         'kontakt' => [
                             'telefon' => $litter['BreederPhone'] ?? '',
                             'epost' => $litter['BreederEmail'] ?? ''

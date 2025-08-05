@@ -112,12 +112,12 @@ function npk_display_valpeliste_from_data($data) {
         $html .= '<div class="valpeliste-info">';
         $html .= '<div class="valpeliste-info-inner">';
         $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Oppdretter:</span> ' . esc_html($kull['oppdretter']['navn']) . '</div>';
-        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Sted:</span> ' . esc_html($kull['oppdretter']['sted'] ?? 'Ikke oppgitt') . '</div>';
-        if (!empty($kull['oppdretter']['kontakt']['telefon'])) {
-            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Telefon:</span> ' . esc_html($kull['oppdretter']['kontakt']['telefon']) . '</div>';
+        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Sted:</span> ' . esc_html($kull['oppdretter']['sted']) . '</div>';
+        if (!empty($kull['oppdretter']['telefon'])) {
+            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Telefon:</span> ' . esc_html($kull['oppdretter']['telefon']) . '</div>';
         }
-        if (!empty($kull['oppdretter']['kontakt']['epost'])) {
-            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">E-post:</span> ' . esc_html($kull['oppdretter']['kontakt']['epost']) . '</div>';
+        if (!empty($kull['oppdretter']['email'])) {
+            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">E-post:</span> ' . esc_html($kull['oppdretter']['email']) . '</div>';
         }
         $html .= '</div>';
         $html .= '</div>';
@@ -151,17 +151,6 @@ function npk_display_valpeliste_from_data($data) {
         $html .= '</span>';
         $html .= '</div>';
         
-        // Father details (samme struktur som den gamle)
-        if (isset($kull['far']['detaljer']) && !empty($kull['far']['detaljer'])) {
-            $html .= '<ul class="valpeliste-parent-details">';
-            foreach ($kull['far']['detaljer'] as $key => $value) {
-                if (!empty($value)) {
-                    $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
-                }
-            }
-            $html .= '</ul>';
-        }
-        
         // Mor (same structure as old)
         $html .= '<div class="valpeliste-parent-row">';
         $html .= '<span class="valpeliste-label">Mor:</span> ';
@@ -186,33 +175,48 @@ function npk_display_valpeliste_from_data($data) {
         $html .= '</span>';
         $html .= '</div>';
         
-        // Mother details
-        if (isset($kull['mor']['detaljer']) && !empty($kull['mor']['detaljer'])) {
-            $html .= '<ul class="valpeliste-parent-details">';
-            foreach ($kull['mor']['detaljer'] as $key => $value) {
-                if (!empty($value)) {
-                    $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
-                }
-            }
-            $html .= '</ul>';
-        }
-        
         $html .= '</div>'; // End parents
-        
-        // Annonsetekst (som i den gamle)
-        if (!empty($kull['annonse_tekst'])) {
-            $html .= '<div class="valpeliste-announcement">';
-            $html .= '<h4>Annonse:</h4>';
-            $html .= '<p>' . wp_kses_post($kull['annonse_tekst']) . '</p>';
-            $html .= '</div>';
-        }
-        
         $html .= '</div>'; // End card body
         $html .= '</div>'; // End card
     }
     
     $html .= '</div>'; // End card group
     $html .= '</div></div>'; // End containers
+    
+    return $html;
+}
+        
+        // Far
+        $far = $kull['far'];
+        $html .= '<div class="parent father">';
+        $html .= '<h4>Far: ' . $far['navn'] . '</h4>';
+        $html .= '<p class="regnr">' . $far['registreringsnummer'] . '</p>';
+        
+        $badges = [];
+        if ($far['elitehund']) $badges[] = '<span class="badge elite">ELITEHUND</span>';
+        if ($far['avlshund']) $badges[] = '<span class="badge avl">AVLSHUND</span>';
+        
+        if (!empty($badges)) {
+            $html .= '<div class="badges">' . implode(' ', $badges) . '</div>';
+        } else {
+            $html .= '<div class="no-badges">Ingen spesielle merknader</div>';
+        }
+        
+        $html .= '</div>';
+        $html .= '</div>'; // parents
+        
+        // Annonse tekst
+        if (!empty($kull['annonse_tekst'])) {
+            $html .= '<div class="annonse">';
+            $html .= '<h5>Annonse:</h5>';
+            $html .= '<p>' . wp_kses_post($kull['annonse_tekst']) . '</p>';
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>'; // kull-card
+    }
+    
+    $html .= '</div>'; // npk-valpeliste
     
     return $html;
 }

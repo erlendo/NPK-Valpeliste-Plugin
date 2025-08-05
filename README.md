@@ -1,6 +1,56 @@
 # NPK Valpeliste WordPress Plugin v1.9.1
 
+# NPK Valpeliste WordPress Plugin v1.9.1
+
 🏆 **Live badge system with zero caching - Production Ready!**
+
+## 🎯 v1.9.1 UI Parity Update
+
+### ✅ Forbedringer i denne versjonen:
+- **UI Matching**: Ny `[npk_valpeliste]` shortcode bruker nå samme HTML-struktur og CSS-klasser som den gamle `[valpeliste]`
+- **Identisk Layout**: Card structure, contact info, badges og annonsetekst er nå identisk
+- **CSS Kompatibilitet**: Samme klasser som `valpeliste-container`, `valpeliste-card`, `valpeliste-badge` osv.
+- **Kontaktinformasjon**: Fullstendig oppdretter-info med telefon, e-post og sted
+- **Badge System**: Elite- og avlshund badges vises likt den gamle implementasjonen
+
+### 🏗️ HTML Struktur (nå identisk):
+```html
+<div class="valpeliste-container">
+  <div class="valpeliste-card-container">
+    <h2 class="valpeliste-section-title approved">NPK Valpeliste</h2>
+    <div class="valpeliste-card-group">
+      <div class="valpeliste-card approved">
+        <div class="valpeliste-card-top">
+          <div class="valpeliste-card-header">
+            <h3>Kennel Navn</h3>
+            <span class="valpeliste-date">Forventet: 2025-02-15</span>
+          </div>
+          <div class="valpeliste-info">
+            <div class="valpeliste-info-inner">
+              <div class="valpeliste-info-row">
+                <span class="valpeliste-label">Oppdretter:</span> Navn
+              </div>
+              <!-- Telefon, e-post osv. -->
+            </div>
+          </div>
+        </div>
+        <div class="valpeliste-card-body">
+          <div class="valpeliste-parents">
+            <div class="valpeliste-parent-row">
+              <span class="valpeliste-label">Far:</span>
+              <span class="valpeliste-parent-info">
+                <span class="valpeliste-value">Hund Navn (RegNr)</span>
+                <span class="valpeliste-badge elitehund">Elitehund</span>
+              </span>
+            </div>
+            <!-- Mor struktur identisk -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 ## 🚀 Overview
 
