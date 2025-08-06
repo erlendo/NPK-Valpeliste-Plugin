@@ -511,3 +511,81 @@
         background-color: rgba(33, 150, 243, 0.15);
     }
 }
+
+/* Styling for hundene i kullet seksjon */
+.valpeliste-dogs-section {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border-left: 3px solid #2196F3;
+}
+
+.valpeliste-dogs-section h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.valpeliste-dogs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.valpeliste-dog-item {
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    font-size: 13px;
+}
+
+.valpeliste-dog-name {
+    font-weight: 500;
+    color: #333;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.valpeliste-dog-details {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.valpeliste-detail-item {
+    font-size: 11px;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #666;
+}
+
+/* Dark mode support for dogs section */
+@media (prefers-color-scheme: dark) {
+    .valpeliste-dogs-section {
+        background-color: #333;
+        border-left-color: #2196F3;
+    }
+    
+    .valpeliste-dogs-section h4 {
+        color: #e0e0e0;
+    }
+    
+    .valpeliste-dog-item {
+        background-color: #2a2a2a;
+        border-color: #444;
+    }
+    
+    .valpeliste-dog-name {
+        color: #e0e0e0;
+    }
+    
+    .valpeliste-detail-item {
+        background-color: #444;
+        color: #ccc;
+    }
+}
