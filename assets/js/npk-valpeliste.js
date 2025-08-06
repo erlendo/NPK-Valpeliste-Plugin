@@ -75,11 +75,14 @@ function initializeCards() {
  * Measure and store the natural heights of all collapsible content
  */
 function measureAllContentHeights() {
-    // Process all parent sections
-    document.querySelectorAll('.valpeliste-parents').forEach(measureSectionHeight);
+    // Process all parent sections (new grid layout)
+    document.querySelectorAll('.valpeliste-parents-grid').forEach(measureSectionHeight);
     
     // Process all notes sections
     document.querySelectorAll('.valpeliste-notes').forEach(measureSectionHeight);
+    
+    // Process all dogs sections
+    document.querySelectorAll('.valpeliste-dogs-section').forEach(measureSectionHeight);
 }
 
 /**
@@ -116,23 +119,34 @@ function measureSectionHeight(section) {
  * Apply the correct height for transitions
  */
 function expandCardContent(cardBody) {
-    const parents = cardBody.querySelector('.valpeliste-parents');
+    const parentsGrid = cardBody.querySelector('.valpeliste-parents-grid');
     const notes = cardBody.querySelector('.valpeliste-notes');
+    const dogsSection = cardBody.querySelector('.valpeliste-dogs-section');
     
-    // Set height to auto for parents section
-    if (parents) {
-        parents.style.maxHeight = 'none';
-        parents.style.opacity = '1';
-        parents.style.padding = '10px';
-        parents.style.margin = '10px 0';
+    // Parents grid is always visible now, but handle it just in case
+    if (parentsGrid) {
+        parentsGrid.style.maxHeight = 'none';
+        parentsGrid.style.opacity = '1';
+        parentsGrid.style.padding = '0';
+        parentsGrid.style.margin = '15px 0';
     }
     
-    // Set height to auto for notes section
+    // Set heights for notes
     if (notes) {
-        notes.style.maxHeight = 'none';
+        const storedHeight = notes.dataset.naturalHeight;
+        notes.style.maxHeight = storedHeight || 'none';
         notes.style.opacity = '1';
-        parents.style.padding = '10px';
-        parents.style.margin = '10px 0';
+        notes.style.padding = '10px';
+        notes.style.margin = '10px 0';
+    }
+    
+    // Set heights for dogs section
+    if (dogsSection) {
+        const storedHeight = dogsSection.dataset.naturalHeight;
+        dogsSection.style.maxHeight = storedHeight || 'none';
+        dogsSection.style.opacity = '1';
+        dogsSection.style.padding = '10px';
+        dogsSection.style.margin = '10px 0';
     }
 }
 
@@ -140,11 +154,15 @@ function expandCardContent(cardBody) {
  * Collapse card content by setting max-height to 0
  */
 function collapseCardContent(cardBody) {
-    const parents = cardBody.querySelector('.valpeliste-parents');
+    const parentsGrid = cardBody.querySelector('.valpeliste-parents-grid');
     const notes = cardBody.querySelector('.valpeliste-notes');
+    const dogsSection = cardBody.querySelector('.valpeliste-dogs-section');
     
-    if (parents) parents.style.maxHeight = '0px';
+    // Don't collapse parents grid - it should always be visible
+    // if (parentsGrid) parentsGrid.style.maxHeight = '0px';
+    
     if (notes) notes.style.maxHeight = '0px';
+    if (dogsSection) dogsSection.style.maxHeight = '0px';
 }
 
 /**
