@@ -3,7 +3,7 @@
  * Plugin Name: Pointer Valpeliste
  * Plugin URI: https://pointer.no
  * Description: En shortcode for å vise valpeliste fra pointer.datahound.no med inline badge-layout
- * Version:           1.9.4
+ * Version:           1.9.5
  * Author: Erlendo
  * Author URI: 
  * Text Domain: npk-valpeliste
@@ -17,10 +17,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Define plugin constants
-define('NPK_VALPELISTE_VERSION', '1.9');
-define('NPK_VALPELISTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('NPK_VALPELISTE_PLUGIN_URL', plugin_dir_url(__FILE__));
+// Define plugin constants with safety checks
+if (!defined('NPK_VALPELISTE_VERSION')) {
+    define('NPK_VALPELISTE_VERSION', '1.9');
+}
+if (!defined('NPK_VALPELISTE_PLUGIN_DIR')) {
+    define('NPK_VALPELISTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('NPK_VALPELISTE_PLUGIN_URL')) {
+    define('NPK_VALPELISTE_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
 
 // Include admin settings with error handling
 if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'includes/admin-settings.php')) {
@@ -384,6 +390,12 @@ if (!function_exists('npk_valpeliste_shortcode')) {
 
 // Make sure shortcode is registered after WordPress has fully loaded
 add_action('init', function() {
+    // Prevent multiple registrations from duplicate plugins
+    static $npk_shortcodes_registered = false;
+    if ($npk_shortcodes_registered) {
+        return;
+    }
+    
     // Register the shortcodes only if they don't exist
     if (!shortcode_exists('valpeliste')) {
         add_shortcode('valpeliste', 'hent_valper_shortcode');
@@ -395,9 +407,15 @@ add_action('init', function() {
         add_shortcode('npk_valpeliste', 'npk_valpeliste_shortcode'); // New shortcode
     }
     
-    // Log only in debug mode
+    $npk_shortcodes_registered = true;
+    
+    // Log only once and only in debug mode
     if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log('NPK Valpeliste: Shortcodes registered');
+        static $npk_logged_once = false;
+        if (!$npk_logged_once) {
+            error_log('NPK Valpeliste: Shortcodes registered (v1.9.5)');
+            $npk_logged_once = true;
+        }
     }
 });
 
@@ -432,7 +450,7 @@ add_action('init', function() {
         }
         $cache_flushed = true;
     }
-}, 1);
+}, 999); // Lower priority to run after shortcodes
 
 /**
  * Plugin deactivation function
