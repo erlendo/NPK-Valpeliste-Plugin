@@ -84,194 +84,230 @@ function npk_display_valpeliste_from_data($data) {
     $html .= '<p>Antall kull: ' . $data['metadata']['antall_kull'] . '</p>';
     $html .= '</div>';
     
-    // VIKTIG: Sorter kull så godkjente kommer først
-    $kull_sortert = $data['kull'];
-    usort($kull_sortert, function($a, $b) {
-        // Godkjente kull skal være øverst
-        $a_godkjent = isset($a['kull_info']['godkjent_avlskriterier']) && $a['kull_info']['godkjent_avlskriterier'];
-        $b_godkjent = isset($b['kull_info']['godkjent_avlskriterier']) && $b['kull_info']['godkjent_avlskriterier'];
-        
-        if ($a_godkjent && !$b_godkjent) return -1; // a først
-        if (!$a_godkjent && $b_godkjent) return 1;  // b først
-        
-        // Hvis begge er like (begge godkjent eller begge ikke-godkjent), sorter alfabetisk på kennel
+    // NYTT: Splitt kull i godkjente og andre
+    $godkjente_kull = [];
+    $andre_kull = [];
+    
+    foreach ($data['kull'] as $kull) {
+        $is_godkjent = isset($kull['kull_info']['godkjent_avlskriterier']) && $kull['kull_info']['godkjent_avlskriterier'];
+        if ($is_godkjent) {
+            $godkjente_kull[] = $kull;
+        } else {
+            $andre_kull[] = $kull;
+        }
+    }
+    
+    // Sorter hver gruppe alfabetisk på kennel
+    usort($godkjente_kull, function($a, $b) {
         return strcmp($a['oppdretter']['kennel'] ?? '', $b['oppdretter']['kennel'] ?? '');
     });
     
-    $html .= '<h2 class="valpeliste-section-title approved">NPK Valpeliste</h2>';
-    $html .= '<div class="valpeliste-card-group">';
+    usort($andre_kull, function($a, $b) {
+        return strcmp($a['oppdretter']['kennel'] ?? '', $b['oppdretter']['kennel'] ?? '');
+    });
     
-    foreach ($kull_sortert as $kull) {
-        // Sjekk om kullet er godkjent for CSS-klasse
-        $is_godkjent = isset($kull['kull_info']['godkjent_avlskriterier']) && $kull['kull_info']['godkjent_avlskriterier'];
-        $card_class = $is_godkjent ? 'valpeliste-card approved' : 'valpeliste-card';
+    // FØRSTE SEKSJON: Godkjente parringer
+    if (!empty($godkjente_kull)) {
+        $html .= '<h2 class="valpeliste-section-title approved">✅ Godkjente parringer</h2>';
+        $html .= '<div class="valpeliste-card-group">';
         
-        // Bruk samme card struktur som den gamle
-        $html .= '<div class="' . $card_class . '">';
-        
-        // Card top section
-        $html .= '<div class="valpeliste-card-top">';
-        
-        // Header info
-        $html .= '<div class="valpeliste-card-header">';
-        $html .= '<h3>' . esc_html($kull['oppdretter']['kennel']) . '</h3>';
-        $html .= '<span class="valpeliste-date">Forventet: ' . esc_html($kull['kull_info']['fodt']) . '</span>';
-        
-        // Godkjenningsbadge - MÅ VISES TYDELIG
-        if ($is_godkjent) {
-            $html .= '<span class="valpeliste-badge godkjent-avl">✅ Godkjent iht. avlskriterier</span>';
-        }
-        $html .= '</div>';
-        
-        // Contact info
-        $html .= '<div class="valpeliste-info">';
-        $html .= '<div class="valpeliste-info-inner">';
-        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Oppdretter:</span> ' . esc_html($kull['oppdretter']['navn']) . '</div>';
-        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Sted:</span> ' . esc_html($kull['oppdretter']['sted'] ?? 'Ikke oppgitt') . '</div>';
-        if (!empty($kull['oppdretter']['kontakt']['telefon'])) {
-            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Telefon:</span> ' . esc_html($kull['oppdretter']['kontakt']['telefon']) . '</div>';
-        }
-        if (!empty($kull['oppdretter']['kontakt']['epost'])) {
-            $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">E-post:</span> ' . esc_html($kull['oppdretter']['kontakt']['epost']) . '</div>';
-        }
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</div>';
-        
-        // Card body content
-        $html .= '<div class="valpeliste-card-body">';
-        $html .= '<div class="valpeliste-parents">';
-        
-        // Far (same structure as old)
-        $html .= '<div class="valpeliste-parent-row">';
-        $html .= '<span class="valpeliste-label">Far:</span> ';
-        $html .= '<span class="valpeliste-parent-info">';
-        $html .= '<span class="valpeliste-value">' . esc_html($kull['far']['navn']);
-        if (!empty($kull['far']['registreringsnummer'])) {
-            $html .= ' (' . esc_html($kull['far']['registreringsnummer']) . ')';
-        }
-        $html .= '</span>';
-        
-        // Father badges
-        $father_badges = '';
-        if ($kull['far']['elitehund']) {
-            $father_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
-        }
-        if ($kull['far']['avlshund']) {
-            $father_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
-        }
-        if (!empty($father_badges)) {
-            $html .= ' ' . $father_badges;
-        }
-        $html .= '</span>';
-        $html .= '</div>';
-        
-        // Father details (samme struktur som den gamle)
-        if (isset($kull['far']['detaljer']) && !empty($kull['far']['detaljer'])) {
-            $html .= '<ul class="valpeliste-parent-details">';
-            foreach ($kull['far']['detaljer'] as $key => $value) {
-                if (!empty($value)) {
-                    $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
-                }
-            }
-            $html .= '</ul>';
+        foreach ($godkjente_kull as $kull) {
+            $html .= npk_render_kull_card($kull, true);
         }
         
-        // Mor (same structure as old)
-        $html .= '<div class="valpeliste-parent-row">';
-        $html .= '<span class="valpeliste-label">Mor:</span> ';
-        $html .= '<span class="valpeliste-parent-info">';
-        $html .= '<span class="valpeliste-value">' . esc_html($kull['mor']['navn']);
-        if (!empty($kull['mor']['registreringsnummer'])) {
-            $html .= ' (' . esc_html($kull['mor']['registreringsnummer']) . ')';
-        }
-        $html .= '</span>';
-        
-        // Mother badges
-        $mother_badges = '';
-        if ($kull['mor']['elitehund']) {
-            $mother_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
-        }
-        if ($kull['mor']['avlshund']) {
-            $mother_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
-        }
-        if (!empty($mother_badges)) {
-            $html .= ' ' . $mother_badges;
-        }
-        $html .= '</span>';
-        $html .= '</div>';
-        
-        // Mother details
-        if (isset($kull['mor']['detaljer']) && !empty($kull['mor']['detaljer'])) {
-            $html .= '<ul class="valpeliste-parent-details">';
-            foreach ($kull['mor']['detaljer'] as $key => $value) {
-                if (!empty($value)) {
-                    $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
-                }
-            }
-            $html .= '</ul>';
-        }
-        
-        $html .= '</div>'; // End parents
-        
-        // NYTT: Vis alle hunder i kullet med deres badges (som i bildet)
-        if (isset($kull['hunder']) && !empty($kull['hunder'])) {
-            $html .= '<div class="valpeliste-dogs-section">';
-            $html .= '<h4>Hunder i kullet:</h4>';
-            $html .= '<div class="valpeliste-dogs-list">';
-            
-            foreach ($kull['hunder'] as $hund) {
-                $html .= '<div class="valpeliste-dog-item">';
-                $html .= '<span class="valpeliste-dog-name">' . esc_html($hund['navn'] ?? 'Ukjent');
-                if (!empty($hund['registreringsnummer'])) {
-                    $html .= ' (' . esc_html($hund['registreringsnummer']) . ')';
-                }
-                $html .= '</span>';
-                
-                // Vis badges for hver hund
-                $dog_badges = '';
-                if (isset($hund['elitehund']) && $hund['elitehund']) {
-                    $dog_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
-                }
-                if (isset($hund['avlshund']) && $hund['avlshund']) {
-                    $dog_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
-                }
-                if (!empty($dog_badges)) {
-                    $html .= ' ' . $dog_badges;
-                }
-                
-                // Vis viktige detaljer (HD, Jaktindeks, etc.)
-                if (isset($hund['detaljer']) && !empty($hund['detaljer'])) {
-                    $html .= '<div class="valpeliste-dog-details">';
-                    foreach (['HD', 'Jaktindeks', 'Avlshund', 'Elitehund'] as $key) {
-                        if (!empty($hund['detaljer'][$key])) {
-                            $html .= '<span class="valpeliste-detail-item"><strong>' . esc_html($key) . ':</strong> ' . esc_html($hund['detaljer'][$key]) . '</span>';
-                        }
-                    }
-                    $html .= '</div>';
-                }
-                
-                $html .= '</div>'; // End dog item
-            }
-            
-            $html .= '</div>'; // End dogs list
-            $html .= '</div>'; // End dogs section
-        }
-        
-        // Annonsetekst (som i den gamle)
-        if (!empty($kull['annonse_tekst'])) {
-            $html .= '<div class="valpeliste-announcement">';
-            $html .= '<h4>Annonse:</h4>';
-            $html .= '<p>' . wp_kses_post($kull['annonse_tekst']) . '</p>';
-            $html .= '</div>';
-        }
-        
-        $html .= '</div>'; // End card body
-        $html .= '</div>'; // End card
+        $html .= '</div>'; // End godkjente group
     }
     
-    $html .= '</div>'; // End card group
+    // ANDRE SEKSJON: Andre parringer
+    if (!empty($andre_kull)) {
+        $html .= '<h2 class="valpeliste-section-title other">📋 Andre parringer</h2>';
+        $html .= '<div class="valpeliste-card-group">';
+        
+        foreach ($andre_kull as $kull) {
+            $html .= npk_render_kull_card($kull, false);
+        }
+        
+        $html .= '</div>'; // End andre group
+    }
+    
     $html .= '</div></div>'; // End containers
+    
+    return $html;
+}
+
+/**
+ * Hjelpe-funksjon for å rendere et enkelt kull-kort
+ */
+function npk_render_kull_card($kull, $is_godkjent = false) {
+    $card_class = $is_godkjent ? 'valpeliste-card approved' : 'valpeliste-card';
+    
+    $html = '<div class="' . $card_class . '">';
+    
+    // Card top section
+    $html .= '<div class="valpeliste-card-top">';
+    
+    // Header info
+    $html .= '<div class="valpeliste-card-header">';
+    $html .= '<h3>' . esc_html($kull['oppdretter']['kennel']) . '</h3>';
+    $html .= '<span class="valpeliste-date">Forventet: ' . esc_html($kull['kull_info']['fodt']) . '</span>';
+    
+    // Godkjenningsbadge - kun for godkjente kull
+    if ($is_godkjent) {
+        $html .= '<span class="valpeliste-badge godkjent-avl">✅ Godkjent iht. avlskriterier</span>';
+    }
+    $html .= '</div>';
+    
+    // Contact info
+    $html .= '<div class="valpeliste-info">';
+    $html .= '<div class="valpeliste-info-inner">';
+    $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Oppdretter:</span> ' . esc_html($kull['oppdretter']['navn']) . '</div>';
+    $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Sted:</span> ' . esc_html($kull['oppdretter']['sted'] ?? 'Ikke oppgitt') . '</div>';
+    if (!empty($kull['oppdretter']['kontakt']['telefon'])) {
+        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">Telefon:</span> ' . esc_html($kull['oppdretter']['kontakt']['telefon']) . '</div>';
+    }
+    if (!empty($kull['oppdretter']['kontakt']['epost'])) {
+        $html .= '<div class="valpeliste-info-row"><span class="valpeliste-label">E-post:</span> ' . esc_html($kull['oppdretter']['kontakt']['epost']) . '</div>';
+    }
+    $html .= '</div>';
+    $html .= '</div>';
+    $html .= '</div>';
+    
+    // Card body content
+    $html .= '<div class="valpeliste-card-body">';
+    
+    // Parents side by side
+    $html .= '<div class="valpeliste-parents-grid">';
+    
+    // Far column
+    $html .= '<div class="valpeliste-parent-column">';
+    $html .= '<div class="valpeliste-parent-row">';
+    $html .= '<span class="valpeliste-label">Far:</span> ';
+    $html .= '<span class="valpeliste-parent-info">';
+    $html .= '<span class="valpeliste-value">' . esc_html($kull['far']['navn']);
+    if (!empty($kull['far']['registreringsnummer'])) {
+        $html .= ' (' . esc_html($kull['far']['registreringsnummer']) . ')';
+    }
+    $html .= '</span>';
+    
+    // Father badges
+    $father_badges = '';
+    if ($kull['far']['elitehund']) {
+        $father_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
+    }
+    if ($kull['far']['avlshund']) {
+        $father_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
+    }
+    if (!empty($father_badges)) {
+        $html .= ' ' . $father_badges;
+    }
+    $html .= '</span>';
+    $html .= '</div>';
+    
+    // Father details
+    if (isset($kull['far']['detaljer']) && !empty($kull['far']['detaljer'])) {
+        $html .= '<ul class="valpeliste-parent-details">';
+        foreach ($kull['far']['detaljer'] as $key => $value) {
+            if (!empty($value)) {
+                $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
+            }
+        }
+        $html .= '</ul>';
+    }
+    $html .= '</div>'; // End far column
+    
+    // Mor column
+    $html .= '<div class="valpeliste-parent-column">';
+    $html .= '<div class="valpeliste-parent-row">';
+    $html .= '<span class="valpeliste-label">Mor:</span> ';
+    $html .= '<span class="valpeliste-parent-info">';
+    $html .= '<span class="valpeliste-value">' . esc_html($kull['mor']['navn']);
+    if (!empty($kull['mor']['registreringsnummer'])) {
+        $html .= ' (' . esc_html($kull['mor']['registreringsnummer']) . ')';
+    }
+    $html .= '</span>';
+    
+    // Mother badges
+    $mother_badges = '';
+    if ($kull['mor']['elitehund']) {
+        $mother_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
+    }
+    if ($kull['mor']['avlshund']) {
+        $mother_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
+    }
+    if (!empty($mother_badges)) {
+        $html .= ' ' . $mother_badges;
+    }
+    $html .= '</span>';
+    $html .= '</div>';
+    
+    // Mother details
+    if (isset($kull['mor']['detaljer']) && !empty($kull['mor']['detaljer'])) {
+        $html .= '<ul class="valpeliste-parent-details">';
+        foreach ($kull['mor']['detaljer'] as $key => $value) {
+            if (!empty($value)) {
+                $html .= '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</li>';
+            }
+        }
+        $html .= '</ul>';
+    }
+    $html .= '</div>'; // End mor column
+    
+    $html .= '</div>'; // End parents grid
+    
+    // NYTT: Vis alle hunder i kullet med deres badges (som i bildet)
+    if (isset($kull['hunder']) && !empty($kull['hunder'])) {
+        $html .= '<div class="valpeliste-dogs-section">';
+        $html .= '<h4>Hunder i kullet:</h4>';
+        $html .= '<div class="valpeliste-dogs-list">';
+        
+        foreach ($kull['hunder'] as $hund) {
+            $html .= '<div class="valpeliste-dog-item">';
+            $html .= '<span class="valpeliste-dog-name">' . esc_html($hund['navn'] ?? 'Ukjent');
+            if (!empty($hund['registreringsnummer'])) {
+                $html .= ' (' . esc_html($hund['registreringsnummer']) . ')';
+            }
+            $html .= '</span>';
+            
+            // Vis badges for hver hund
+            $dog_badges = '';
+            if (isset($hund['elitehund']) && $hund['elitehund']) {
+                $dog_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
+            }
+            if (isset($hund['avlshund']) && $hund['avlshund']) {
+                $dog_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
+            }
+            if (!empty($dog_badges)) {
+                $html .= ' ' . $dog_badges;
+            }
+            
+            // Vis viktige detaljer (HD, Jaktindeks, etc.)
+            if (isset($hund['detaljer']) && !empty($hund['detaljer'])) {
+                $html .= '<div class="valpeliste-dog-details">';
+                foreach (['HD', 'Jaktindeks', 'Avlshund', 'Elitehund'] as $key) {
+                    if (!empty($hund['detaljer'][$key])) {
+                        $html .= '<span class="valpeliste-detail-item"><strong>' . esc_html($key) . ':</strong> ' . esc_html($hund['detaljer'][$key]) . '</span>';
+                    }
+                }
+                $html .= '</div>';
+            }
+            
+            $html .= '</div>'; // End dog item
+        }
+        
+        $html .= '</div>'; // End dogs list
+        $html .= '</div>'; // End dogs section
+    }
+    
+    // Annonsetekst (som i den gamle)
+    if (!empty($kull['annonse_tekst'])) {
+        $html .= '<div class="valpeliste-announcement">';
+        $html .= '<h4>Annonse:</h4>';
+        $html .= '<p>' . wp_kses_post($kull['annonse_tekst']) . '</p>';
+        $html .= '</div>';
+    }
+    
+    $html .= '</div>'; // End card body
+    $html .= '</div>'; // End card
     
     return $html;
 }

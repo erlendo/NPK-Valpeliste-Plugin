@@ -3,7 +3,7 @@
  * Plugin Name: Pointer Valpeliste
  * Plugin URI: https://pointer.no
  * Description: En shortcode for å vise valpeliste fra pointer.datahound.no med inline badge-layout
- * Version:           1.9.7
+ * Version:           1.9.8
  * Author: Erlendo
  * Author URI: 
  * Text Domain: npk-valpeliste
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants with safety checks
 if (!defined('NPK_VALPELISTE_VERSION')) {
-    define('NPK_VALPELISTE_VERSION', '1.9');
+    define('NPK_VALPELISTE_VERSION', '1.9.8');
 }
 if (!defined('NPK_VALPELISTE_PLUGIN_DIR')) {
     define('NPK_VALPELISTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -413,7 +413,7 @@ add_action('init', function() {
     if (defined('WP_DEBUG') && WP_DEBUG) {
         static $npk_logged_once = false;
         if (!$npk_logged_once) {
-            error_log('NPK Valpeliste: Shortcodes registered (v1.9.7)');
+            error_log('NPK Valpeliste: Shortcodes registered (v1.9.8)');
             $npk_logged_once = true;
         }
     }

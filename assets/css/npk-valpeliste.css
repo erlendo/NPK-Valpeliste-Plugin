@@ -305,6 +305,7 @@
 
 /* Initially hide detailed content with better transitions */
 .valpeliste-card-body .valpeliste-parents,
+.valpeliste-card-body .valpeliste-parents-grid,
 .valpeliste-card-body .valpeliste-notes {
     max-height: 0;
     overflow: hidden;
@@ -320,6 +321,7 @@
 
 /* Style for expanded state with NO max-height restriction */
 .valpeliste-card-body.expanded .valpeliste-parents,
+.valpeliste-card-body.expanded .valpeliste-parents-grid,
 .valpeliste-card-body.expanded .valpeliste-notes {
     max-height: none !important; /* Override any JS-applied value */
     height: auto !important;     /* Ensure height is automatic */
@@ -331,9 +333,37 @@
 
 /* Only keep height constraints when collapsed */
 .valpeliste-card-body:not(.expanded) .valpeliste-parents,
+.valpeliste-card-body:not(.expanded) .valpeliste-parents-grid,
 .valpeliste-card-body:not(.expanded) .valpeliste-notes {
     max-height: 0;
     overflow: hidden;
+}
+
+/* NEW: Side-by-side parent layout */
+.valpeliste-parents-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 15px 0;
+}
+
+.valpeliste-parent-column {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #007cba;
+}
+
+.valpeliste-parent-column:nth-child(2) {
+    border-left-color: #e91e63;
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 768px) {
+    .valpeliste-parents-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
 }
 
 /* Better handling of notes content */
