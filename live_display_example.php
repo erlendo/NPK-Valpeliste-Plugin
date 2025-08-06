@@ -70,18 +70,10 @@ function npk_display_valpeliste() {
     return $html;
 }
 
-// WordPress shortcode for live display - INGEN CACHING
-function npk_valpeliste_shortcode($atts) {
-    // Hent fresh data direkte fra API hver gang
-    $data = npk_get_live_data();
-    
-    if (isset($data['error'])) {
-        return '<div class="npk-error">Feil: ' . $data['error'] . '</div>';
-    }
-    
-    return npk_display_valpeliste_from_data($data);
-}
-
+/**
+ * Display function for valpeliste from live data
+ * Note: Main shortcode function is defined in npk_valpeliste.php
+ */
 function npk_display_valpeliste_from_data($data) {
     // Start container med samme struktur som den gamle
     $html = '<div class="valpeliste-container"><div class="valpeliste-card-container">';
