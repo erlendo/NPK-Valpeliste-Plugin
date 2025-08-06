@@ -587,18 +587,39 @@
 }
 
 .valpeliste-dog-details {
-    margin-top: 6px;
+    margin-top: 8px;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 6px;
+    line-height: 1.3;
 }
 
 .valpeliste-detail-item {
     font-size: 11px;
     background: #f0f0f0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    color: #666;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #555;
+    border: 1px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.valpeliste-detail-item strong {
+    color: #333;
+    font-weight: 600;
+}
+
+/* Responsive: Stack details on very small screens */
+@media (max-width: 480px) {
+    .valpeliste-dog-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .valpeliste-detail-item {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
 }
 
 /* Dark mode support for dogs section */
@@ -624,5 +645,10 @@
     .valpeliste-detail-item {
         background-color: #444;
         color: #ccc;
+        border-color: #555;
+    }
+    
+    .valpeliste-detail-item strong {
+        color: #e0e0e0;
     }
 }

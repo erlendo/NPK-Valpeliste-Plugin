@@ -283,9 +283,28 @@ function npk_render_kull_card($kull, $is_godkjent = false) {
             // Vis viktige detaljer (HD, Jaktindeks, etc.)
             if (isset($hund['detaljer']) && !empty($hund['detaljer'])) {
                 $html .= '<div class="valpeliste-dog-details">';
-                foreach (['HD', 'Jaktindeks', 'Avlshund', 'Elitehund'] as $key) {
+                
+                // Prioriterte felter i bestemt rekkefølge
+                $priority_fields = [
+                    'HD' => 'HD',
+                    'Jaktindeks' => 'Jaktindeks', 
+                    'Alternativ HD' => 'Alt. HD',
+                    'Alternativ HD (mor)' => 'Alt. HD (mor)',
+                    'Stående jaktindeks' => 'Stående jakt.',
+                    'Avlshund' => 'Avlshund',
+                    'Elitehund' => 'Elitehund'
+                ];
+                
+                foreach ($priority_fields as $key => $display_name) {
                     if (!empty($hund['detaljer'][$key])) {
-                        $html .= '<span class="valpeliste-detail-item"><strong>' . esc_html($key) . ':</strong> ' . esc_html($hund['detaljer'][$key]) . '</span>';
+                        $html .= '<span class="valpeliste-detail-item"><strong>' . esc_html($display_name) . ':</strong> ' . esc_html($hund['detaljer'][$key]) . '</span>';
+                    }
+                }
+                
+                // Vis andre detaljer som ikke er i prioriterte liste
+                foreach ($hund['detaljer'] as $key => $value) {
+                    if (!empty($value) && !array_key_exists($key, $priority_fields)) {
+                        $html .= '<span class="valpeliste-detail-item"><strong>' . esc_html($key) . ':</strong> ' . esc_html($value) . '</span>';
                     }
                 }
                 $html .= '</div>';
