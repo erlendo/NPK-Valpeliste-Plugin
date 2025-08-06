@@ -3,7 +3,7 @@
  * Plugin Name: Pointer Valpeliste
  * Plugin URI: https://pointer.no
  * Description: En shortcode for å vise valpeliste fra pointer.datahound.no med inline badge-layout
- * Version:           1.9.2
+ * Version:           1.9.3
  * Author: Erlendo
  * Author URI: 
  * Text Domain: npk-valpeliste
@@ -22,17 +22,41 @@ define('NPK_VALPELISTE_VERSION', '1.9');
 define('NPK_VALPELISTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('NPK_VALPELISTE_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Include admin settings
-require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/admin-settings.php';
+// Include admin settings with error handling
+if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'includes/admin-settings.php')) {
+    require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/admin-settings.php';
+} else {
+    add_action('admin_notices', function() {
+        echo '<div class="notice notice-error"><p>NPK Valpeliste: Missing admin-settings.php file</p></div>';
+    });
+}
 
-// Include helper functions
-require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/helpers.php';
+// Include helper functions with error handling
+if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'includes/helpers.php')) {
+    require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/helpers.php';
+} else {
+    add_action('admin_notices', function() {
+        echo '<div class="notice notice-error"><p>NPK Valpeliste: Missing helpers.php file</p></div>';
+    });
+}
 
-// Include data processing functions
-require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/data-processing.php';
+// Include data processing functions with error handling
+if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'includes/data-processing.php')) {
+    require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/data-processing.php';
+} else {
+    add_action('admin_notices', function() {
+        echo '<div class="notice notice-error"><p>NPK Valpeliste: Missing data-processing.php file</p></div>';
+    });
+}
 
-// Include rendering functions
-require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/rendering.php';
+// Include rendering functions with error handling
+if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'includes/rendering.php')) {
+    require_once NPK_VALPELISTE_PLUGIN_DIR . 'includes/rendering.php';
+} else {
+    add_action('admin_notices', function() {
+        echo '<div class="notice notice-error"><p>NPK Valpeliste: Missing rendering.php file</p></div>';
+    });
+}
 
 // Create includes directory if it doesn't exist
 $includes_dir = NPK_VALPELISTE_PLUGIN_DIR . '/includes';
@@ -298,14 +322,77 @@ function hent_valper_shortcode($atts = []) {
     return $html;
 }
 
+/**
+ * New shortcode function using NPKDataExtractorLive for complete data
+ */
+function npk_valpeliste_shortcode($atts = []) {
+    // Parse attributes
+    $atts = shortcode_atts([
+        'debug' => 'no',
+    ], $atts);
+    
+    $debug_mode = ($atts['debug'] === 'yes');
+    
+    // Check for URL parameters for debug mode (for admin users only)
+    if (current_user_can('manage_options')) {
+        if (isset($_GET['npk_debug']) && $_GET['npk_debug'] === '1') {
+            $debug_mode = true;
+        }
+    }
+    
+    // Try to use the new live display function
+    if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php')) {
+        require_once NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php';
+        
+        if (function_exists('npk_get_live_data') && function_exists('npk_display_valpeliste_from_data')) {
+            try {
+                $data = npk_get_live_data();
+                
+                if (isset($data['error'])) {
+                    if ($debug_mode) {
+                        return '<div class="npk-error">NPK API Error: ' . esc_html($data['error']) . '</div>';
+                    } else {
+                        return '<div class="npk-error">Could not load puppy data at this time.</div>';
+                    }
+                }
+                
+                return npk_display_valpeliste_from_data($data);
+                
+            } catch (Exception $e) {
+                if ($debug_mode) {
+                    return '<div class="npk-error">Exception: ' . esc_html($e->getMessage()) . '</div>';
+                } else {
+                    return '<div class="npk-error">Could not load puppy data.</div>';
+                }
+            }
+        }
+    }
+    
+    // Fallback to old shortcode if new one fails
+    if ($debug_mode) {
+        return '<div class="npk-notice">Falling back to old shortcode method</div>' . hent_valper_shortcode($atts);
+    } else {
+        return hent_valper_shortcode($atts);
+    }
+}
+
 // Make sure shortcode is registered after WordPress has fully loaded
 add_action('init', function() {
-    // Register the shortcodes
-    add_shortcode('valpeliste', 'hent_valper_shortcode');
-    add_shortcode('hent_valper', 'hent_valper_shortcode'); // Optional alias
+    // Register the shortcodes only if they don't exist
+    if (!shortcode_exists('valpeliste')) {
+        add_shortcode('valpeliste', 'hent_valper_shortcode');
+    }
+    if (!shortcode_exists('hent_valper')) {
+        add_shortcode('hent_valper', 'hent_valper_shortcode'); // Optional alias
+    }
+    if (!shortcode_exists('npk_valpeliste')) {
+        add_shortcode('npk_valpeliste', 'npk_valpeliste_shortcode'); // New shortcode
+    }
     
-    // Log that shortcodes have been registered
-    error_log('NPK Valpeliste: Shortcodes registered');
+    // Log only in debug mode
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('NPK Valpeliste: Shortcodes registered');
+    }
 });
 
 // Register activation and deactivation hooks
@@ -321,20 +408,21 @@ function npk_valpeliste_activate() {
         wp_cache_flush();
     }
     
-    // Force WordPress to detect the shortcode
-    add_shortcode('valpeliste', 'hent_valper_shortcode');
-    
-    // Log activation
-    error_log('NPK Valpeliste: Plugin activated');
+    // Log activation only in debug mode
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('NPK Valpeliste: Plugin activated');
+    }
 }
 
-// Consider adding this to force a flush on every load during development
+// Cache flush only in debug mode and only once per request
 add_action('init', function() {
-    if (defined('WP_DEBUG') && WP_DEBUG) {
+    static $cache_flushed = false;
+    if (defined('WP_DEBUG') && WP_DEBUG && !$cache_flushed) {
         // Clear object cache
         if (function_exists('wp_cache_flush')) {
             wp_cache_flush();
         }
+        $cache_flushed = true;
     }
 }, 1);
 
