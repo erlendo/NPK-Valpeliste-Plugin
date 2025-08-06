@@ -303,8 +303,9 @@
     padding-bottom: 45px; /* Space for the "Les mer" button */
 }
 
-/* Show parent info by default, hide other content */
-.valpeliste-card-body .valpeliste-parents-grid {
+/* Show parent info and dogs section by default, hide only notes */
+.valpeliste-card-body .valpeliste-parents-grid,
+.valpeliste-card-body .valpeliste-dogs-section {
     max-height: none !important;
     opacity: 1;
     margin: 15px 0;
@@ -313,9 +314,8 @@
     width: 100%;
 }
 
-/* Initially hide only detailed notes and dogs content */
-.valpeliste-card-body .valpeliste-notes,
-.valpeliste-card-body .valpeliste-dogs-section {
+/* Initially hide only detailed notes content */
+.valpeliste-card-body .valpeliste-notes {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -329,8 +329,7 @@
 }
 
 /* Style for expanded state with NO max-height restriction */
-.valpeliste-card-body.expanded .valpeliste-notes,
-.valpeliste-card-body.expanded .valpeliste-dogs-section {
+.valpeliste-card-body.expanded .valpeliste-notes {
     max-height: none !important; /* Override any JS-applied value */
     height: auto !important;     /* Ensure height is automatic */
     opacity: 1;
@@ -340,8 +339,7 @@
 }
 
 /* Only keep height constraints when collapsed */
-.valpeliste-card-body:not(.expanded) .valpeliste-notes,
-.valpeliste-card-body:not(.expanded) .valpeliste-dogs-section {
+.valpeliste-card-body:not(.expanded) .valpeliste-notes {
     max-height: 0;
     overflow: hidden;
 }

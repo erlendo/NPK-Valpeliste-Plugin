@@ -123,7 +123,7 @@ function expandCardContent(cardBody) {
     const notes = cardBody.querySelector('.valpeliste-notes');
     const dogsSection = cardBody.querySelector('.valpeliste-dogs-section');
     
-    // Parents grid is always visible now, but handle it just in case
+    // Parents grid and dogs section are always visible now, but ensure they're not restricted
     if (parentsGrid) {
         parentsGrid.style.maxHeight = 'none';
         parentsGrid.style.opacity = '1';
@@ -131,22 +131,21 @@ function expandCardContent(cardBody) {
         parentsGrid.style.margin = '15px 0';
     }
     
-    // Set heights for notes
+    // Dogs section should also always be visible
+    if (dogsSection) {
+        dogsSection.style.maxHeight = 'none';
+        dogsSection.style.opacity = '1';
+        dogsSection.style.padding = '10px';
+        dogsSection.style.margin = '10px 0';
+    }
+    
+    // Only expand notes section when "Les mer" is clicked
     if (notes) {
         const storedHeight = notes.dataset.naturalHeight;
         notes.style.maxHeight = storedHeight || 'none';
         notes.style.opacity = '1';
         notes.style.padding = '10px';
         notes.style.margin = '10px 0';
-    }
-    
-    // Set heights for dogs section
-    if (dogsSection) {
-        const storedHeight = dogsSection.dataset.naturalHeight;
-        dogsSection.style.maxHeight = storedHeight || 'none';
-        dogsSection.style.opacity = '1';
-        dogsSection.style.padding = '10px';
-        dogsSection.style.margin = '10px 0';
     }
 }
 
@@ -158,11 +157,12 @@ function collapseCardContent(cardBody) {
     const notes = cardBody.querySelector('.valpeliste-notes');
     const dogsSection = cardBody.querySelector('.valpeliste-dogs-section');
     
-    // Don't collapse parents grid - it should always be visible
+    // Don't collapse parents grid or dogs section - they should always be visible
     // if (parentsGrid) parentsGrid.style.maxHeight = '0px';
+    // if (dogsSection) dogsSection.style.maxHeight = '0px';
     
+    // Only collapse notes section
     if (notes) notes.style.maxHeight = '0px';
-    if (dogsSection) dogsSection.style.maxHeight = '0px';
 }
 
 /**

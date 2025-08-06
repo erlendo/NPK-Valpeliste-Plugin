@@ -191,10 +191,10 @@ function npk_render_kull_card($kull, $is_godkjent = false) {
     
     // Father badges
     $father_badges = '';
-    if ($kull['far']['elitehund']) {
+    if (isset($kull['far']['elitehund']) && $kull['far']['elitehund']) {
         $father_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
     }
-    if ($kull['far']['avlshund']) {
+    if (isset($kull['far']['avlshund']) && $kull['far']['avlshund']) {
         $father_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
     }
     if (!empty($father_badges)) {
@@ -228,10 +228,10 @@ function npk_render_kull_card($kull, $is_godkjent = false) {
     
     // Mother badges
     $mother_badges = '';
-    if ($kull['mor']['elitehund']) {
+    if (isset($kull['mor']['elitehund']) && $kull['mor']['elitehund']) {
         $mother_badges .= '<span class="valpeliste-badge elitehund">Elitehund</span>';
     }
-    if ($kull['mor']['avlshund']) {
+    if (isset($kull['mor']['avlshund']) && $kull['mor']['avlshund']) {
         $mother_badges .= '<span class="valpeliste-badge avlshund">Avlshund</span>';
     }
     if (!empty($mother_badges)) {
