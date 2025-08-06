@@ -15,13 +15,23 @@ class NPKDataExtractorLive {
 
     public function __construct(bool $debug = false) {
         $this->debug = $debug;
-        $this->cookieJar = tempnam(sys_get_temp_dir(), 'npk_cookies');
+        // Use a more persistent cookie file name
+        $this->cookieJar = sys_get_temp_dir() . '/npk_cookies_' . date('Ymd') . '.txt';
+        
+        // Only delete old cookie files (older than today)
+        $pattern = sys_get_temp_dir() . '/npk_cookies_*.txt';
+        foreach (glob($pattern) as $file) {
+            $fileDate = basename($file, '.txt');
+            $fileDate = str_replace('npk_cookies_', '', $fileDate);
+            if ($fileDate < date('Ymd')) {
+                unlink($file);
+            }
+        }
     }
 
     public function __destruct() {
-        if (file_exists($this->cookieJar)) {
-            unlink($this->cookieJar);
-        }
+        // Don't delete cookie file automatically - let it persist for the day
+        // This allows multiple requests to use the same authentication session
     }
 
     /**
