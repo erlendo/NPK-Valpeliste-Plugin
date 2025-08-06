@@ -3,7 +3,7 @@
  * Plugin Name: Pointer Valpeliste
  * Plugin URI: https://pointer.no
  * Description: En shortcode for å vise valpeliste fra pointer.datahound.no med inline badge-layout
- * Version:           1.9.3
+ * Version:           1.9.4
  * Author: Erlendo
  * Author URI: 
  * Text Domain: npk-valpeliste
@@ -214,165 +214,171 @@ if (!function_exists('render_puppy_listing')) {
 }
 
 // Register scripts and styles
-function npk_valpeliste_enqueue_scripts() {
-    // Enqueue dashicons
-    wp_enqueue_style('dashicons');
-    
-    // Enqueue CSS
-    wp_enqueue_style('npk-valpeliste-css', plugins_url('assets/css/npk-valpeliste.css', __FILE__), array(), NPK_VALPELISTE_VERSION);
-    
-    // Enqueue JavaScript
-    wp_enqueue_script('npk-valpeliste-js', plugins_url('assets/js/npk-valpeliste.js', __FILE__), array('jquery'), NPK_VALPELISTE_VERSION, true);
+if (!function_exists('npk_valpeliste_enqueue_scripts')) {
+    function npk_valpeliste_enqueue_scripts() {
+        // Enqueue dashicons
+        wp_enqueue_style('dashicons');
+        
+        // Enqueue CSS
+        wp_enqueue_style('npk-valpeliste-css', plugins_url('assets/css/npk-valpeliste.css', __FILE__), array(), NPK_VALPELISTE_VERSION);
+        
+        // Enqueue JavaScript
+        wp_enqueue_script('npk-valpeliste-js', plugins_url('assets/js/npk-valpeliste.js', __FILE__), array('jquery'), NPK_VALPELISTE_VERSION, true);
+    }
 }
 add_action('wp_enqueue_scripts', 'npk_valpeliste_enqueue_scripts');
 
 // Main shortcode function
-function hent_valper_shortcode($atts = []) {
-    // Parse attributes
-    $atts = shortcode_atts([
-        'debug' => 'no',
-    ], $atts);
-    
-    $debug_mode = ($atts['debug'] === 'yes');
-    
-    // Check for URL parameters for debug mode (for admin users only)
-    if (current_user_can('manage_options')) {
-        if (isset($_GET['npk_debug']) && $_GET['npk_debug'] === '1') {
-            $debug_mode = true;
-        }
-    }
-    
-    // Verify functions exist before calling them
-    if (!function_exists('fetch_puppy_data')) {
-        if ($debug_mode) {
-            return '<div class="error">Error: Required function fetch_puppy_data() not found. Check plugin installation.</div>';
-        } else {
-            return '<div class="error">Error loading puppy data. Please contact administrator.</div>';
-        }
-    }
-    
-    // Fetch fresh data (always real-time)
-    $response = fetch_puppy_data(false, $debug_mode);
-    
-    // Handle debug response
-    if ($debug_mode && is_array($response) && isset($response['debug'])) {
-        $debug_output = $response['debug'];
-        $data = $response['data'];
-    } else if ($debug_mode && is_string($response)) {
-        // Error message with debug info
-        return $response;
-    } else {
-        $debug_output = '';
-        $data = $response;
-    }
-
-    // Konverter til ny individstruktur før videre prosessering
-    if (function_exists('convert_to_individual_structure')) {
-        // Extract dogs array from API response if needed
-        if (is_array($data) && isset($data['dogs']) && is_array($data['dogs'])) {
-            $data = convert_to_individual_structure($data['dogs']);
-        } else if (is_array($data) && !isset($data['dogs'])) {
-            // Data is already an array of dogs - make sure each element is an array
-            $is_dogs_array = true;
-            foreach ($data as $item) {
-                if (!is_array($item)) {
-                    $is_dogs_array = false;
-                    break;
-                }
+if (!function_exists('hent_valper_shortcode')) {
+    function hent_valper_shortcode($atts = []) {
+        // Parse attributes
+        $atts = shortcode_atts([
+            'debug' => 'no',
+        ], $atts);
+        
+        $debug_mode = ($atts['debug'] === 'yes');
+        
+        // Check for URL parameters for debug mode (for admin users only)
+        if (current_user_can('manage_options')) {
+            if (isset($_GET['npk_debug']) && $_GET['npk_debug'] === '1') {
+                $debug_mode = true;
             }
-            if ($is_dogs_array) {
-                $data = convert_to_individual_structure($data);
+        }
+        
+        // Verify functions exist before calling them
+        if (!function_exists('fetch_puppy_data')) {
+            if ($debug_mode) {
+                return '<div class="error">Error: Required function fetch_puppy_data() not found. Check plugin installation.</div>';
+            } else {
+                return '<div class="error">Error loading puppy data. Please contact administrator.</div>';
+            }
+        }
+        
+        // Fetch fresh data (always real-time)
+        $response = fetch_puppy_data(false, $debug_mode);
+        
+        // Handle debug response
+        if ($debug_mode && is_array($response) && isset($response['debug'])) {
+            $debug_output = $response['debug'];
+            $data = $response['data'];
+        } else if ($debug_mode && is_string($response)) {
+            // Error message with debug info
+            return $response;
+        } else {
+            $debug_output = '';
+            $data = $response;
+        }
+
+        // Konverter til ny individstruktur før videre prosessering
+        if (function_exists('convert_to_individual_structure')) {
+            // Extract dogs array from API response if needed
+            if (is_array($data) && isset($data['dogs']) && is_array($data['dogs'])) {
+                $data = convert_to_individual_structure($data['dogs']);
+            } else if (is_array($data) && !isset($data['dogs'])) {
+                // Data is already an array of dogs - make sure each element is an array
+                $is_dogs_array = true;
+                foreach ($data as $item) {
+                    if (!is_array($item)) {
+                        $is_dogs_array = false;
+                        break;
+                    }
+                }
+                if ($is_dogs_array) {
+                    $data = convert_to_individual_structure($data);
+                } else {
+                    // Invalid data structure
+                    if ($debug_mode) {
+                        $debug_output .= '<div class="error">Error: Data structure is not an array of dogs</div>';
+                    }
+                    $data = array();
+                }
             } else {
                 // Invalid data structure
                 if ($debug_mode) {
-                    $debug_output .= '<div class="error">Error: Data structure is not an array of dogs</div>';
+                    $debug_output .= '<div class="error">Error: Invalid data structure for convert_to_individual_structure() - data type: ' . gettype($data) . '</div>';
                 }
                 $data = array();
             }
-        } else {
-            // Invalid data structure
-            if ($debug_mode) {
-                $debug_output .= '<div class="error">Error: Invalid data structure for convert_to_individual_structure() - data type: ' . gettype($data) . '</div>';
-            }
-            $data = array();
         }
-    }
 
-    // Process data
-    if (!function_exists('process_puppy_data')) {
-        if ($debug_mode) {
-            return $debug_output . '<div class="error">Error: Required function process_puppy_data() not found.</div>';
-        } else {
-            return '<div class="error">Error processing puppy data. Please contact administrator.</div>';
+        // Process data
+        if (!function_exists('process_puppy_data')) {
+            if ($debug_mode) {
+                return $debug_output . '<div class="error">Error: Required function process_puppy_data() not found.</div>';
+            } else {
+                return '<div class="error">Error processing puppy data. Please contact administrator.</div>';
+            }
         }
-    }
-    
-    $processed_data = process_puppy_data($data);
-    
-    // Render the puppy listing
-    if (!function_exists('render_puppy_listing')) {
-        if ($debug_mode) {
-            return $debug_output . '<div class="error">Error: Required function render_puppy_listing() not found.</div>';
-        } else {
-            return '<div class="error">Error rendering puppy data. Please contact administrator.</div>';
+        
+        $processed_data = process_puppy_data($data);
+        
+        // Render the puppy listing
+        if (!function_exists('render_puppy_listing')) {
+            if ($debug_mode) {
+                return $debug_output . '<div class="error">Error: Required function render_puppy_listing() not found.</div>';
+            } else {
+                return '<div class="error">Error rendering puppy data. Please contact administrator.</div>';
+            }
         }
+        
+        $html = render_puppy_listing($processed_data, $debug_output);
+        return $html;
     }
-    
-    $html = render_puppy_listing($processed_data, $debug_output);
-    return $html;
 }
 
 /**
  * New shortcode function using NPKDataExtractorLive for complete data
  */
-function npk_valpeliste_shortcode($atts = []) {
-    // Parse attributes
-    $atts = shortcode_atts([
-        'debug' => 'no',
-    ], $atts);
-    
-    $debug_mode = ($atts['debug'] === 'yes');
-    
-    // Check for URL parameters for debug mode (for admin users only)
-    if (current_user_can('manage_options')) {
-        if (isset($_GET['npk_debug']) && $_GET['npk_debug'] === '1') {
-            $debug_mode = true;
-        }
-    }
-    
-    // Try to use the new live display function
-    if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php')) {
-        require_once NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php';
+if (!function_exists('npk_valpeliste_shortcode')) {
+    function npk_valpeliste_shortcode($atts = []) {
+        // Parse attributes
+        $atts = shortcode_atts([
+            'debug' => 'no',
+        ], $atts);
         
-        if (function_exists('npk_get_live_data') && function_exists('npk_display_valpeliste_from_data')) {
-            try {
-                $data = npk_get_live_data();
-                
-                if (isset($data['error'])) {
-                    if ($debug_mode) {
-                        return '<div class="npk-error">NPK API Error: ' . esc_html($data['error']) . '</div>';
-                    } else {
-                        return '<div class="npk-error">Could not load puppy data at this time.</div>';
+        $debug_mode = ($atts['debug'] === 'yes');
+        
+        // Check for URL parameters for debug mode (for admin users only)
+        if (current_user_can('manage_options')) {
+            if (isset($_GET['npk_debug']) && $_GET['npk_debug'] === '1') {
+                $debug_mode = true;
+            }
+        }
+        
+        // Try to use the new live display function
+        if (file_exists(NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php')) {
+            require_once NPK_VALPELISTE_PLUGIN_DIR . 'live_display_example.php';
+            
+            if (function_exists('npk_get_live_data') && function_exists('npk_display_valpeliste_from_data')) {
+                try {
+                    $data = npk_get_live_data();
+                    
+                    if (isset($data['error'])) {
+                        if ($debug_mode) {
+                            return '<div class="npk-error">NPK API Error: ' . esc_html($data['error']) . '</div>';
+                        } else {
+                            return '<div class="npk-error">Could not load puppy data at this time.</div>';
+                        }
                     }
-                }
-                
-                return npk_display_valpeliste_from_data($data);
-                
-            } catch (Exception $e) {
-                if ($debug_mode) {
-                    return '<div class="npk-error">Exception: ' . esc_html($e->getMessage()) . '</div>';
-                } else {
-                    return '<div class="npk-error">Could not load puppy data.</div>';
+                    
+                    return npk_display_valpeliste_from_data($data);
+                    
+                } catch (Exception $e) {
+                    if ($debug_mode) {
+                        return '<div class="npk-error">Exception: ' . esc_html($e->getMessage()) . '</div>';
+                    } else {
+                        return '<div class="npk-error">Could not load puppy data.</div>';
+                    }
                 }
             }
         }
-    }
-    
-    // Fallback to old shortcode if new one fails
-    if ($debug_mode) {
-        return '<div class="npk-notice">Falling back to old shortcode method</div>' . hent_valper_shortcode($atts);
-    } else {
-        return hent_valper_shortcode($atts);
+        
+        // Fallback to old shortcode if new one fails
+        if ($debug_mode) {
+            return '<div class="npk-notice">Falling back to old shortcode method</div>' . hent_valper_shortcode($atts);
+        } else {
+            return hent_valper_shortcode($atts);
+        }
     }
 }
 
@@ -402,15 +408,17 @@ register_deactivation_hook(__FILE__, 'npk_valpeliste_deactivate');
 /**
  * Plugin activation function
  */
-function npk_valpeliste_activate() {
-    // Clear caches
-    if (function_exists('wp_cache_flush')) {
-        wp_cache_flush();
-    }
-    
-    // Log activation only in debug mode
-    if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log('NPK Valpeliste: Plugin activated');
+if (!function_exists('npk_valpeliste_activate')) {
+    function npk_valpeliste_activate() {
+        // Clear caches
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+        
+        // Log activation only in debug mode
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('NPK Valpeliste: Plugin activated');
+        }
     }
 }
 
@@ -429,8 +437,10 @@ add_action('init', function() {
 /**
  * Plugin deactivation function
  */
-function npk_valpeliste_deactivate() {
-    // Clean up any transient data
-    delete_transient('pointer_valpeliste_live_data');
-    delete_transient('pointer_valpeliste_html');
+if (!function_exists('npk_valpeliste_deactivate')) {
+    function npk_valpeliste_deactivate() {
+        // Clean up any transient data
+        delete_transient('pointer_valpeliste_live_data');
+        delete_transient('pointer_valpeliste_html');
+    }
 }
